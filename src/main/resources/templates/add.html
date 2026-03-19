@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Transaction - Finlytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Finlytics</h2>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/transactions-page">Transactions</a>
+        <a href="/upload-page">Upload</a>
+        <a href="/summary-page">Summary</a>
+        <a href="/add-page">Add</a>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <h1>Add Transaction</h1>
+
+    <label>Amount</label><br>
+    <input type="number" id="amount"><br><br>
+
+    <label>Type</label><br>
+    <select id="type">
+        <option value="expense">Expense</option>
+        <option value="income">Income</option>
+    </select><br><br>
+
+    <label>Category</label><br>
+
+    <input type="text" id="categorySearch" placeholder="Search category">
+
+    <select id="categorySelect"></select>
+
+    <button type="button" onclick="createCategory()">
+        New Category
+    </button>
+
+    <br><br>
+
+    <label>Note</label><br>
+    <input type="text" id="note"><br><br>
+
+    <label>Date</label><br>
+    <input type="datetime-local" id="date"><br><br>
+
+    <button onclick="addTx()" class="btn">Save</button>
+
+    <p id="status"></p>
+
+</div>
+
+
+<script src="/js/add.js"></script>
+
+</body>
+</html>

@@ -25,4 +25,24 @@ public class TransactionController {
     public Transaction add(@RequestBody Transaction t) {
         return repo.save(t);
     }
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        repo.deleteById(id);
+    }
+    @PutMapping("/{id}")
+    public Transaction update(
+            @PathVariable int id,
+            @RequestBody Transaction newTx
+    ) {
+
+        Transaction tx = repo.findById(id).orElseThrow();
+
+        tx.setAmount(newTx.getAmount());
+        tx.setType(newTx.getType());
+        tx.setNote(newTx.getNote());
+        tx.setDate(newTx.getDate());
+        tx.setCategory(newTx.getCategory());
+
+        return repo.save(tx);
+    }
 }

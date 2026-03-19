@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload - Finlytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Finlytics</h2>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/transactions-page">Transactions</a>
+        <a href="/upload-page">Upload</a>
+        <a href="/summary-page">Summary</a>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <h1>Upload UPI Statement</h1>
+
+    <input type="file" id="fileInput">
+
+    <br><br>
+
+    <button onclick="uploadFile()" class="btn">
+        Upload
+    </button>
+
+    <p id="status"></p>
+
+</div>
+<br><br>
+
+<div class="manual-link">
+
+    <p>OR</p>
+
+    <a href="/add-page" class="btn">
+        Add Transaction Manually
+    </a>
+
+</div>
+
+
+<script src="/js/upload.js"></script>
+
+</body>
+</html>

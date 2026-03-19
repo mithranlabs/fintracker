@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transactions - Finlytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Finlytics</h2>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/transactions-page">Transactions</a>
+        <a href="/upload-page">Upload</a>
+        <a href="/summary-page">Summary</a>
+    </div>
+</div>
+
+<div id="editBox" style="display:none; border:1px solid black; padding:10px; margin-bottom:20px;">
+
+    <h3>Edit Transaction</h3>
+
+    <input id="editId" type="hidden">
+
+    Amount:
+    <input id="editAmount"><br>
+
+    Type:
+    <input id="editType"><br>
+
+    Note:
+    <input id="editNote"><br>
+
+    Category:
+    <select id="editCategory"></select>
+
+    <button onclick="saveEdit()">Save</button>
+    <button onclick="closeEdit()">Cancel</button>
+
+</div>
+<div class="container">
+
+    <h1>Transactions</h1>
+
+    <table id="txTable">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Note</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script src="/js/transactions.js"></script>
+
+</body>
+</html>
