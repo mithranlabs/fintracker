@@ -53,18 +53,24 @@ function saveEdit() {
 
     const categoryId = document.getElementById("editCategory").value;
 
-    fetch("/transactions/" + id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            amount: amount,
-            type: type,
-            note: note,
-            category: { id: categoryId }
+    const applyAll = document.getElementById("applyAll").checked;
+    const updateRule = document.getElementById("updateRule").checked;
+
+    fetch("/transactions/" + id +
+        "?applyAll=" + applyAll +
+        "&updateRule=" + updateRule,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                amount: amount,
+                type: type,
+                note: note,
+                category: { id: categoryId }
+            })
         })
-    })
         .then(() => location.reload());
 
 }

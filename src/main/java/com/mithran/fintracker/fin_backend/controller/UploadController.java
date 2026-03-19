@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Optional;
 
 
 
@@ -135,17 +136,30 @@ public class UploadController {
                         t.setDate(date);
                         Category category = null;
 
-                        String noteText = note.toLowerCase();
+                        String noteText = note;
 
-                        MerchantRule rule = ruleRepository.findByKeyword(noteText);
+                        if (noteText.startsWith("Paid to ")) {
+                            noteText = noteText.substring(8);
+                        }
 
-                        if (rule != null) {
+                        if (noteText.startsWith("Received from ")) {
+                            noteText = noteText.substring(14);
+                        }
+
+                        noteText = noteText.trim().toLowerCase();
+
+                        Optional<MerchantRule> ruleOpt =
+                                ruleRepository.findByKeyword(noteText);
+
+                        if (ruleOpt.isPresent()) {
+
+                            MerchantRule rule = ruleOpt.get();
 
                             category = rule.getCategory();
 
                         } else {
 
-                            // CHeK KEYWORD MAp
+                            // CHECK KEYWORD MAP
 
                             for (String catName : categoryKeywords.keySet()) {
 
