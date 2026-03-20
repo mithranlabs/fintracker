@@ -34,7 +34,8 @@
     <input id="editNote"><br>
 
     Category:
-    <select id="editCategory"></select>
+    <input list="categoryList" id="editCategory">
+    <datalist id="categoryList"></datalist>
 
 
     <button onclick="saveEdit()">Save</button>
@@ -57,6 +58,7 @@
 <div class="container">
 
     <h1>Transactions</h1>
+    <button onclick="clearAll()">Clear All Transactions</button>
 
     <table id="txTable">
 

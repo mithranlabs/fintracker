@@ -26,7 +26,7 @@
 
     <h2>Category Summary</h2>
 
-    <table id="catTable">
+    <table id="categoryTable">
         <thead>
         <tr>
             <th>Category</th>
@@ -55,8 +55,13 @@
     <div class="chart-grid">
 
         <div class="chart-box">
-            <h3>Category Chart</h3>
-            <canvas id="catChart"></canvas>
+            <h3>Expense Categories</h3>
+            <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Income Categories</h3>
+            <canvas id="incomeChart"></canvas>
         </div>
 
         <div class="chart-box">
@@ -65,13 +70,16 @@
         </div>
 
         <div class="chart-box">
-            <h3>Top Merchants</h3>
+            <h3>Top Contacts</h3>
             <canvas id="merchantChart"></canvas>
+        </div>
+        <div class="chart-box month-chart">
+            <h3>Monthly Summary</h3>
+            <canvas id="monthChart"></canvas>
         </div>
 
     </div>
 </div>
-
 <script src="/js/chart.js"></script>
 <script src="/js/summary.js"></script>
 

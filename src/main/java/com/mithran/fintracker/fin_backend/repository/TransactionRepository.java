@@ -7,9 +7,11 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     @Query("""
-SELECT t.category.name, SUM(t.amount)
+SELECT c.name, SUM(t.amount), t.type
 FROM Transaction t
-GROUP BY t.category.name
+JOIN t.category c
+GROUP BY c.name, t.type
+ORDER BY SUM(t.amount) DESC
 """)
     List<Object[]> getCategorySummary();
 
@@ -20,11 +22,13 @@ GROUP BY t.type
 """)
     List<Object[]> getTypeSummary();
     @Query("""
-SELECT FUNCTION('DATE_FORMAT', t.date, '%Y-%m'),
-       SUM(t.amount)
+SELECT 
+    FUNCTION('DATE_FORMAT', t.date, '%Y-%m'),
+    SUM(t.amount),
+    t.type
 FROM Transaction t
-GROUP BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m')
-ORDER BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m')
+GROUP BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m'), t.type
+ORDER BY 1
 """)
     List<Object[]> getMonthlySummary();
     @Query("""

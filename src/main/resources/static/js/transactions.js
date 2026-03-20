@@ -4,18 +4,17 @@ function loadCategories() {
         .then(res => res.json())
         .then(data => {
 
-            const select = document.getElementById("editCategory");
+            const list = document.getElementById("categoryList");
 
-            select.innerHTML = "";
+            list.innerHTML = "";
 
             data.forEach(c => {
 
                 const opt = document.createElement("option");
 
-                opt.value = c.id;
-                opt.text = c.name;
+                opt.value = c.name;
 
-                select.appendChild(opt);
+                list.appendChild(opt);
 
             });
 
@@ -27,6 +26,16 @@ function deleteTx(id) {
     if (!confirm("Delete this transaction?")) return;
 
     fetch("/transactions/" + id, {
+        method: "DELETE"
+    })
+        .then(() => location.reload());
+
+}
+function clearAll() {
+
+    if (!confirm("Delete ALL transactions?")) return;
+
+    fetch("/transactions/clear", {
         method: "DELETE"
     })
         .then(() => location.reload());
@@ -51,7 +60,7 @@ function saveEdit() {
     const type = document.getElementById("editType").value;
     const note = document.getElementById("editNote").value;
 
-    const categoryId = document.getElementById("editCategory").value;
+    const categoryName = document.getElementById("editCategory").value;
 
     const applyAll = document.getElementById("applyAll").checked;
     const updateRule = document.getElementById("updateRule").checked;
@@ -68,7 +77,7 @@ function saveEdit() {
                 amount: amount,
                 type: type,
                 note: note,
-                category: { id: categoryId }
+                category: { name: categoryName }
             })
         })
         .then(() => location.reload());

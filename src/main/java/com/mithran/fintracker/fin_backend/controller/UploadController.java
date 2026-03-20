@@ -57,7 +57,10 @@ public class UploadController {
     }
 
     @PostMapping
-    public String upload(@RequestParam("file") MultipartFile file) {
+    public String upload(@RequestParam("file") MultipartFile file,@RequestParam(defaultValue = "false") boolean replace) {
+        if (replace) {
+            repo.deleteAll();
+        }
 
         try {
 
@@ -170,7 +173,15 @@ public class UploadController {
                                     if (noteText.contains(w)) {
 
                                         category = categoryRepository.findByName(catName);
-                                        break;
+
+                                        if (category == null) {
+
+                                            category = new Category();
+                                            category.setName(catName);
+                                            category.setType(type);
+
+                                            categoryRepository.save(category);
+                                        }
                                     }
                                 }
 

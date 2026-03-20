@@ -32,6 +32,7 @@ public class SummaryController {
 
             map.put("category", row[0]);
             map.put("total", row[1]);
+            map.put("type", row[2]);
 
             result.add(map);
         }
@@ -70,6 +71,7 @@ public class SummaryController {
 
             map.put("month", row[0]);
             map.put("total", row[1]);
+            map.put("type", row[2]);
 
             result.add(map);
         }

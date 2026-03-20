@@ -4,45 +4,86 @@ fetch("/summary/category")
     .then(res => res.json())
     .then(data => {
 
-        const table = document.querySelector("#catTable tbody");
+        let expenseLabels = []
+        let expenseValues = []
 
-        const labels = [];
-        const values = [];
+        let incomeLabels = []
+        let incomeValues = []
 
-        data.forEach(row => {
+        data.forEach(r => {
 
-            const tr = document.createElement("tr");
+            if (r.type === "expense") {
+                expenseLabels.push(r.category)
+                expenseValues.push(r.total)
+            }
 
-            tr.innerHTML = `
-                <td>${row.category}</td>
-                <td>${row.total}</td>
-            `;
+            if (r.type === "income") {
+                incomeLabels.push(r.category)
+                incomeValues.push(r.total)
+            }
 
-            table.appendChild(tr);
+        })
+        const table =
+            document.querySelector("#categoryTable tbody");
 
-            labels.push(row.category);
-            values.push(row.total);
+        if (table) {
 
-        });
+            table.innerHTML = "";
 
+            data.forEach(r => {
 
-        // CHART
+                if (r.type !== "expense") return;
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+            <td>${r.category}</td>
+            <td>${r.total}</td>
+        `;
+
+                table.appendChild(row);
+
+            });
+
+        }
 
         new Chart(
-            document.getElementById("catChart"),
+            document.getElementById("expenseChart"),
             {
                 type: "pie",
                 data: {
-                    labels: labels,
+                    labels: expenseLabels,
                     datasets: [{
-                        data: values
+                        data: expenseValues
                     }]
+                    },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+
+            }
+        )
+
+        new Chart(
+            document.getElementById("incomeChart"),
+            {
+                type: "pie",
+                data: {
+                    labels: incomeLabels,
+                    datasets: [{
+                        data: incomeValues
+                    }]
+
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             }
-        );
+        )
 
-
-    });
+    })
 
 // TYPE SUMMARY
 
@@ -80,7 +121,12 @@ fetch("/summary/type")
                     datasets: [{
                         data: values
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
+
             }
         );
 
@@ -111,6 +157,8 @@ fetch("/summary/merchant")
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
@@ -134,3 +182,72 @@ fetch("/summary/merchant")
         );
 
     });
+fetch("/summary/month")
+    .then(res => res.json())
+    .then(data => {
+
+        let months = []
+
+        let expense = []
+        let income = []
+
+        data.forEach(r => {
+
+            if (!months.includes(r.month)) {
+                months.push(r.month)
+            }
+
+        })
+
+        months.forEach(m => {
+
+            let e = 0
+            let i = 0
+
+            data.forEach(r => {
+
+                if (r.month === m && r.type === "expense") {
+                    e = r.total
+                }
+
+                if (r.month === m && r.type === "income") {
+                    i = r.total
+                }
+
+            })
+
+            expense.push(e)
+            income.push(i)
+
+        })
+
+
+        new Chart(
+            document.getElementById("monthChart"),
+            {
+                type: "bar",
+
+                data: {
+                    labels: months,
+
+                    datasets: [
+                        {
+                            label: "Expense",
+                            data: expense
+                        },
+                        {
+                            label: "Income",
+                            data: income
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+
+            }
+        )
+
+    })

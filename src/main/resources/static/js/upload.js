@@ -7,6 +7,9 @@ function uploadFile() {
     const formData = new FormData();
 
     formData.append("file", file);
+    const replace = document.getElementById("replaceOld").checked;
+
+    formData.append("replace", replace);
 
 
     fetch("/upload", {

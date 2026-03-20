@@ -1,6 +1,8 @@
 package com.mithran.fintracker.fin_backend.controller;
 
 import com.mithran.fintracker.fin_backend.entity.Transaction;
+import com.mithran.fintracker.fin_backend.entity.Category;
+import com.mithran.fintracker.fin_backend.repository.CategoryRepository;
 import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
@@ -14,10 +16,13 @@ public class TransactionController {
 
     private final TransactionRepository repo;
     private final MerchantRuleRepository ruleRepo;
+    private final CategoryRepository categoryRepository;
 
-    public TransactionController(TransactionRepository repo, MerchantRuleRepository ruleRepo) {
+    public TransactionController(TransactionRepository repo, MerchantRuleRepository ruleRepo,CategoryRepository categoryRepository) {
         this.repo = repo;
         this.ruleRepo = ruleRepo;
+        this.categoryRepository = categoryRepository;
+
     }
 
     @GetMapping
@@ -33,6 +38,10 @@ public class TransactionController {
     public void delete(@PathVariable int id) {
         repo.deleteById(id);
     }
+    @DeleteMapping("/clear")
+    public void clearAll() {
+        repo.deleteAll();
+    }
     @PutMapping("/{id}")
     public Transaction update(
             @PathVariable int id,
@@ -46,8 +55,26 @@ public class TransactionController {
         tx.setAmount(newTx.getAmount());
         tx.setType(newTx.getType());
         tx.setNote(newTx.getNote());
-        tx.setDate(newTx.getDate());
-        tx.setCategory(newTx.getCategory());
+        if (newTx.getDate() != null) {
+            tx.setDate(newTx.getDate());
+        }
+        if (newTx.getCategory() != null) {
+
+            String name = newTx.getCategory().getName();
+
+            Category c = categoryRepository.findByName(name);
+
+            if (c == null) {
+
+                c = new Category();
+                c.setName(name);
+                c.setType(newTx.getType());
+
+                categoryRepository.save(c);
+            }
+
+            tx.setCategory(c);
+        }
 
         repo.save(tx);
 
