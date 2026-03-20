@@ -107,6 +107,7 @@ http://localhost:8080
 Event: Yukthi 2026 CODE CRAFTERS – WEB DEVELOPMENT (WEB WIZARDS) 
 Topic: Personal Finance Planner
 
+Participants:
 - Mithran M
 - Chandan N 7975742388
 - Bharat HG 8660665494
