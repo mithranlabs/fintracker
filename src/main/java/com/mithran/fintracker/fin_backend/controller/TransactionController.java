@@ -4,9 +4,13 @@ import com.mithran.fintracker.fin_backend.entity.Transaction;
 import com.mithran.fintracker.fin_backend.entity.Category;
 import com.mithran.fintracker.fin_backend.repository.CategoryRepository;
 import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
 import com.mithran.fintracker.fin_backend.repository.MerchantRuleRepository;
+import jakarta.servlet.http.HttpSession;
+import com.mithran.fintracker.fin_backend.entity.User;
+import com.mithran.fintracker.fin_backend.repository.UserRepository;
 import java.util.Optional;
 import java.util.List;
 
@@ -17,40 +21,116 @@ public class TransactionController {
     private final TransactionRepository repo;
     private final MerchantRuleRepository ruleRepo;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public TransactionController(TransactionRepository repo, MerchantRuleRepository ruleRepo,CategoryRepository categoryRepository) {
+    public TransactionController(TransactionRepository repo, MerchantRuleRepository ruleRepo,CategoryRepository categoryRepository,UserRepository userRepository) {
         this.repo = repo;
         this.ruleRepo = ruleRepo;
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
 
     }
 
     @GetMapping
-    public List<Transaction> getAll() {
-        return repo.findAll();
+    public List<Transaction> getAll(HttpSession session) {
+
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (userId == null) return List.of();
+
+        return repo.findByUserId(userId);
     }
 
+
     @PostMapping
-    public Transaction add(@RequestBody Transaction t) {
+    public Transaction add(
+            @RequestBody Transaction t,
+            HttpSession session
+    ) {
+
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (userId == null) {
+            return null;
+        }
+
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElse(null);
+
+        t.setUser(user);
+
         return repo.save(t);
     }
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) {
+    public void delete(
+            @PathVariable int id,
+            HttpSession session
+    ) {
+
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (userId == null) return;
+
+        Transaction t =
+                repo.findById(id).orElse(null);
+
+        if (t == null) return;
+
+        if (t.getUser() == null) return;
+
+        if (t.getUser().getId() != userId) {
+            return;
+        }
+
         repo.deleteById(id);
     }
     @DeleteMapping("/clear")
-    public void clearAll() {
-        repo.deleteAll();
+    public void clearAll(HttpSession session) {
+
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (userId == null) return;
+
+        List<Transaction> list = repo.findAll();
+
+        for (Transaction t : list) {
+
+            if (t.getUser() != null &&
+                    t.getUser().getId() == userId) {
+
+                repo.delete(t);
+            }
+        }
     }
     @PutMapping("/{id}")
     public Transaction update(
             @PathVariable int id,
             @RequestBody Transaction newTx,
             @RequestParam(defaultValue = "false") boolean applyAll,
-            @RequestParam(defaultValue = "false") boolean updateRule
+            @RequestParam(defaultValue = "false") boolean updateRule,
+            HttpSession session
     ) {
 
-        Transaction tx = repo.findById(id).orElseThrow();
+        Transaction tx = repo.findById(id).orElse(null);
+
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (tx == null || userId == null) {
+            return null;
+        }
+
+        if (tx.getUser() == null ||
+                tx.getUser().getId() != userId) {
+
+            return null;
+        }
 
         tx.setAmount(newTx.getAmount());
         tx.setType(newTx.getType());
@@ -81,23 +161,30 @@ public class TransactionController {
         String note = tx.getNote();
 
         // APPLY ALL
+
         if (applyAll) {
+
+
 
             var list = repo.findAll();
 
             for (Transaction t : list) {
 
-                if (t.getNote() != null &&
-                        note != null &&
-                        t.getNote().equals(note)) {
+                if (
+                        t.getUser() != null &&
+                                t.getUser().getId() == userId &&
+                                t.getNote() != null &&
+                                t.getNote().equals(note)
+                ) {
 
-                    t.setCategory(newTx.getCategory());
+                    Category c = categoryRepository
+                            .findByName(newTx.getCategory().getName());
+
+                    t.setCategory(c);
+
                     repo.save(t);
-
                 }
-
             }
-
         }
 
         //  UPDATE RULE
@@ -131,7 +218,12 @@ public class TransactionController {
 
             }
 
-            rule.setCategory(newTx.getCategory());
+            Category c =
+                    categoryRepository.findByName(
+                            newTx.getCategory().getName()
+                    );
+
+            rule.setCategory(c);
 
             ruleRepo.save(rule);
 

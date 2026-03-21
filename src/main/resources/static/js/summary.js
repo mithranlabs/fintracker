@@ -251,3 +251,4 @@ fetch("/summary/month")
         )
 
     })
+

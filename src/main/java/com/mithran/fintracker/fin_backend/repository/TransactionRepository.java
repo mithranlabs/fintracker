@@ -10,32 +10,37 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 SELECT c.name, SUM(t.amount), t.type
 FROM Transaction t
 JOIN t.category c
+WHERE t.user.id = :userId
 GROUP BY c.name, t.type
 ORDER BY SUM(t.amount) DESC
 """)
-    List<Object[]> getCategorySummary();
+    List<Object[]> getCategorySummary(int userId);
 
     @Query("""
 SELECT t.type, SUM(t.amount)
 FROM Transaction t
+WHERE t.user.id = :userId
 GROUP BY t.type
 """)
-    List<Object[]> getTypeSummary();
+    List<Object[]> getTypeSummary(int userId);
     @Query("""
 SELECT 
     FUNCTION('DATE_FORMAT', t.date, '%Y-%m'),
     SUM(t.amount),
     t.type
 FROM Transaction t
+WHERE t.user.id = :userId
 GROUP BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m'), t.type
 ORDER BY 1
 """)
-    List<Object[]> getMonthlySummary();
+    List<Object[]> getMonthlySummary(int userId);
     @Query("""
 SELECT t.note, SUM(t.amount)
 FROM Transaction t
+WHERE t.user.id = :userId
 GROUP BY t.note
 ORDER BY SUM(t.amount) DESC
 """)
-    List<Object[]> getMerchantSummary();
+    List<Object[]> getMerchantSummary(int userId);
+    List<Transaction> findByUserId(int userId);
 }

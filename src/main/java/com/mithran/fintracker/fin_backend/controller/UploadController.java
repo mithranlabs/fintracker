@@ -1,9 +1,12 @@
 package com.mithran.fintracker.fin_backend.controller;
 
 import com.mithran.fintracker.fin_backend.entity.Transaction;
+import com.mithran.fintracker.fin_backend.entity.User;
 import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
 import com.mithran.fintracker.fin_backend.repository.MerchantRuleRepository;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
+import com.mithran.fintracker.fin_backend.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +32,7 @@ public class UploadController {
     private final TransactionRepository repo;
     private final CategoryRepository categoryRepository;
     private final MerchantRuleRepository ruleRepository;
+    private final UserRepository userRepository;
 
     private static final Map<String, List<String>> categoryKeywords = new HashMap<>();
 
@@ -50,14 +54,23 @@ public class UploadController {
     }
 
     public UploadController(TransactionRepository repo,
-                            CategoryRepository categoryRepository,MerchantRuleRepository ruleRepository) {
+                            CategoryRepository categoryRepository,MerchantRuleRepository ruleRepository,UserRepository userRepository) {
         this.repo = repo;
         this.categoryRepository = categoryRepository;
         this.ruleRepository = ruleRepository;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
-    public String upload(@RequestParam("file") MultipartFile file,@RequestParam(defaultValue = "false") boolean replace) {
+    public String upload(@RequestParam("file") MultipartFile file,@RequestParam(defaultValue = "false") boolean replace,HttpSession session){
+        Integer userId =
+                (Integer) session.getAttribute("userId");
+
+        if (userId == null) {
+            return "Not logged in";
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
         if (replace) {
             repo.deleteAll();
         }
@@ -137,6 +150,7 @@ public class UploadController {
                         t.setType(type);
                         t.setNote(note);
                         t.setDate(date);
+                        t.setUser(user);
                         Category category = null;
 
                         String noteText = note;
