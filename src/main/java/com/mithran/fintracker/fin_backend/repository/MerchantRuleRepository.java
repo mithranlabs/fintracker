@@ -10,4 +10,5 @@ public interface MerchantRuleRepository
 
     Optional<MerchantRule> findByKeyword(String keyword);
 
+
 }

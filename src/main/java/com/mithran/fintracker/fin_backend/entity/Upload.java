@@ -10,6 +10,8 @@ public class Upload {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private int transactionCount;
+
 
     private String fileName;
 
@@ -47,6 +49,11 @@ public class Upload {
     public void setUploadDate(Date uploadDate) {
         this.uploadDate = uploadDate;
     }
+    public int getTransactionCount() { return transactionCount; }
+    public void setTransactionCount(int transactionCount) {
+        this.transactionCount = transactionCount;
+    }
+
 
 
     public User getUser() {

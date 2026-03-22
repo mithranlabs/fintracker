@@ -206,3 +206,65 @@ button:hover {
     cursor: pointer;
 
 }
+.budget-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-top: 30px;
+}
+
+.budget-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    color: #222;
+}
+
+.budget-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.budget-controls select,
+.budget-controls input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+#budgetTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#budgetTable th, #budgetTable td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+#budgetTable th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #555;
+}
+
+.status-ok   { color: #16a34a; font-weight: 600; }
+.status-warn { color: #d97706; font-weight: 600; }
+.status-over { color: #dc2626; font-weight: 600; }
+
+.btn-delete-budget {
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.btn-delete-budget:hover { background: #cc0000; }

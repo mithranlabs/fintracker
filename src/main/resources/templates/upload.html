@@ -3,13 +3,66 @@
 <head>
     <title>Upload - Finlytics</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .history-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-top: 30px;
+        }
+
+        .history-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #222;
+        }
+
+        #historyTable {
+            width: 100%;
+            border-collapse: collapse;
+            display: none;
+        }
+
+        #historyTable th, #historyTable td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        #historyTable th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #555;
+        }
+
+        #historyTable tr:hover td { background: #fafafa; }
+
+        .btn-delete-upload {
+            background: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+        }
+
+        .btn-delete-upload:hover { background: #cc0000; }
+
+        #noHistoryMsg {
+            display: none;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="navbar">
     <h2>Finlytics</h2>
-
     <div class="nav-links">
         <a href="/">Home</a>
         <a href="/transactions-page">Transactions</a>
@@ -17,7 +70,6 @@
         <a href="/summary-page">Summary</a>
     </div>
 </div>
-
 
 <div class="container">
 
@@ -32,25 +84,37 @@
     </label>
     <br>
 
-    <button onclick="uploadFile()" class="btn">
-        Upload
-    </button>
+    <button onclick="uploadFile()" class="btn">Upload</button>
 
     <p id="status"></p>
 
 </div>
+
 <br><br>
 
 <div class="manual-link">
-
     <p>OR</p>
-
-    <a href="/add-page" class="btn">
-        Add Transaction Manually
-    </a>
-
+    <a href="/add-page" class="btn">Add Transaction Manually</a>
 </div>
 
+<div class="container">
+    <div class="history-card">
+        <h2>Upload History</h2>
+        <p id="noHistoryMsg">No uploads yet.</p>
+        <table id="historyTable">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Date</th>
+                <th>Transactions</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
 
 <script src="/js/upload.js"></script>
 

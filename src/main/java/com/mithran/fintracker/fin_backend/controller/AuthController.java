@@ -3,9 +3,11 @@ package com.mithran.fintracker.fin_backend.controller;
 import com.mithran.fintracker.fin_backend.entity.User;
 import com.mithran.fintracker.fin_backend.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -14,6 +16,7 @@ public class AuthController {
     public AuthController(UserRepository repo) {
         this.repo = repo;
     }
+
 
 
     @PostMapping("/register")
@@ -60,6 +63,12 @@ public class AuthController {
         session.invalidate();
 
         return "Logged out";
+    }
+    @GetMapping("/me")
+    public ResponseEntity<?> me(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+        return ResponseEntity.ok("Logged in");
     }
 
 }

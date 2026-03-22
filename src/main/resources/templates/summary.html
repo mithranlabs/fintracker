@@ -79,6 +79,35 @@
         </div>
 
     </div>
+    <div class="budget-section">
+        <h2>Budget Tracker</h2>
+
+        <div class="budget-controls">
+            <select id="budgetCategory"></select>
+            <input type="number" id="budgetAmount" placeholder="Limit (₹)" min="0" />
+            <input type="month" id="budgetMonth" />
+            <button class="btn" onclick="setBudget()">Set Budget</button>
+        </div>
+
+        <p id="budgetStatus"></p>
+
+        <table id="budgetTable" style="display:none;">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Budget</th>
+                <th>Spent</th>
+                <th>Remaining</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="budgetBody"></tbody>
+        </table>
+
+        <p id="noBudgetMsg" style="display:none; color:#888;">No budgets set for this month.</p>
+    </div>
+
 </div>
 <script src="/js/chart.js"></script>
 <script src="/js/summary.js"></script>

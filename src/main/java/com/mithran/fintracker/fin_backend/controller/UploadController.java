@@ -1,28 +1,27 @@
 package com.mithran.fintracker.fin_backend.controller;
 
-import com.mithran.fintracker.fin_backend.entity.Transaction;
-import com.mithran.fintracker.fin_backend.entity.User;
-import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
-import com.mithran.fintracker.fin_backend.repository.MerchantRuleRepository;
+import com.mithran.fintracker.fin_backend.entity.Category;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
+import com.mithran.fintracker.fin_backend.entity.Transaction;
+import com.mithran.fintracker.fin_backend.entity.Upload;
+import com.mithran.fintracker.fin_backend.entity.User;
+import com.mithran.fintracker.fin_backend.repository.CategoryRepository;
+import com.mithran.fintracker.fin_backend.repository.MerchantRuleRepository;
+import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
+import com.mithran.fintracker.fin_backend.repository.UploadRepository;
 import com.mithran.fintracker.fin_backend.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import com.mithran.fintracker.fin_backend.repository.CategoryRepository;
-import com.mithran.fintracker.fin_backend.entity.Category;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Optional;
 
+import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.*;
 
 
 @RestController
@@ -33,6 +32,8 @@ public class UploadController {
     private final CategoryRepository categoryRepository;
     private final MerchantRuleRepository ruleRepository;
     private final UserRepository userRepository;
+    private final UploadRepository uploadRepository;  // ← ADD THIS
+
 
     private static final Map<String, List<String>> categoryKeywords = new HashMap<>();
 
@@ -54,11 +55,12 @@ public class UploadController {
     }
 
     public UploadController(TransactionRepository repo,
-                            CategoryRepository categoryRepository,MerchantRuleRepository ruleRepository,UserRepository userRepository) {
+                            CategoryRepository categoryRepository, MerchantRuleRepository ruleRepository,UserRepository userRepository,UploadRepository uploadRepository) {
         this.repo = repo;
         this.categoryRepository = categoryRepository;
         this.ruleRepository = ruleRepository;
         this.userRepository = userRepository;
+        this.uploadRepository = uploadRepository;
     }
 
     @PostMapping
@@ -94,6 +96,7 @@ public class UploadController {
             Date date = new Date();
             String dateStr = null;
             String timeStr = null;
+            int savedCount = 0;
 
             for (int i = 0; i < lines.length; i++) {
 
@@ -220,6 +223,7 @@ public class UploadController {
                         t.setCategory(category);
 
                         repo.save(t);
+                        savedCount++;
 
                         System.out.println("Saved => " + note + " | " + amount + " | " + type);
                         note = null;
@@ -229,6 +233,12 @@ public class UploadController {
                     }
                 }
             }
+            Upload upload = new Upload();
+            upload.setFileName(file.getOriginalFilename());
+            upload.setUploadDate(new Date());
+            upload.setTransactionCount(savedCount);
+            upload.setUser(user);
+            uploadRepository.save(upload);
 
 
             return "Parsed and saved";
@@ -238,4 +248,46 @@ public class UploadController {
             return "Error";
         }
     }
+    @GetMapping("/history")
+    public ResponseEntity<?> getUploadHistory(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.status(404).body("User not found");
+
+        List<Upload> uploads = uploadRepository.findByUserOrderByUploadDateDesc(user);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Upload u : uploads) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", u.getId());
+            map.put("fileName", u.getFileName());
+            map.put("date", u.getUploadDate().toString());
+            map.put("transactionCount", u.getTransactionCount());
+            result.add(map);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELETE /upload/delete/{id}  —  removes an upload record from history
+    // ─────────────────────────────────────────────────────────────────────────
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteUploadRecord(@PathVariable Integer id, HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+
+        Upload upload = uploadRepository.findById(id).orElse(null);
+        if (upload == null) return ResponseEntity.status(404).body("Upload not found");
+
+        if (upload.getUser().getId() != userId) {
+            return ResponseEntity.status(403).body("Forbidden");
+        }
+
+        uploadRepository.delete(upload);
+        return ResponseEntity.ok("Deleted");
+    }
 }
+

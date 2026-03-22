@@ -3,13 +3,113 @@
 <head>
     <title>Finlytics</title>
     <link rel="stylesheet" href="/css/style.css">
-</head>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
 
+        .dash-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .dash-card .label {
+            font-size: 0.82rem;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dash-card .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .dash-card.income .value  { color: #16a34a; }
+        .dash-card.expense .value { color: #dc2626; }
+        .dash-card.savings .value { color: #2563eb; }
+
+        .section-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .section-card h2 {
+            font-size: 1rem;
+            color: #111827;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .budget-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .budget-bar-label {
+            width: 100px;
+            font-size: 0.88rem;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        .budget-bar-track {
+            flex: 1;
+            background: #f0f0f0;
+            border-radius: 999px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .budget-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        .budget-bar-meta {
+            font-size: 0.8rem;
+            color: #888;
+            width: 110px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        #recentTable td, #recentTable th {
+            font-size: 0.88rem;
+        }
+
+        .type-income  { color: #16a34a; font-weight: 600; }
+        .type-expense { color: #dc2626; font-weight: 600; }
+
+        .month-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 700px) {
+            .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
 <body>
 
 <div class="navbar">
     <h2>Finlytics</h2>
-
     <div class="nav-links">
         <a href="/">Home</a>
         <a href="/transactions-page">Transactions</a>
@@ -19,41 +119,65 @@
     </div>
 </div>
 
+<div class="container" style="max-width:960px; margin-top:30px;">
+    <h1 id="welcomeMsg" style="font-size:1.5rem; color:#111827; margin-bottom:4px;"></h1>
 
-<div class="hero">
+    <p class="month-label" id="monthLabel"></p>
 
-    <h1>Welcome to Finlytics</h1>
-
-    <p>
-        Smart finance tracker with PDF parsing,
-        automatic categorization, and analytics dashboard.
-    </p>
-
-
-    <div class="buttons">
-
-        <a href="/upload-page" class="btn">Upload Statement</a>
-
-        <a href="/transactions-page" class="btn">View Transactions</a>
-
-        <a href="/summary-page" class="btn">View Summary</a>
-
-
+    <!-- Cards -->
+    <div class="dashboard-grid">
+        <div class="dash-card income">
+            <div class="label">Income</div>
+            <div class="value" id="cardIncome">—</div>
+        </div>
+        <div class="dash-card expense">
+            <div class="label">Expenses</div>
+            <div class="value" id="cardExpense">—</div>
+        </div>
+        <div class="dash-card savings">
+            <div class="label">Net Savings</div>
+            <div class="value" id="cardSavings">—</div>
+        </div>
+        <div class="dash-card">
+            <div class="label">Transactions</div>
+            <div class="value" id="cardCount">—</div>
+        </div>
     </div>
 
+    <!-- Budget Health -->
+    <div class="section-card" id="budgetSection" style="display:none;">
+        <h2>Budget Health — This Month</h2>
+        <div id="budgetBars"></div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section-card">
+        <h2>Recent Transactions</h2>
+        <table id="recentTable" style="display:none;">
+            <thead>
+            <tr>
+                <th>Note</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody id="recentBody"></tbody>
+        </table>
+        <p id="noRecentMsg" style="color:#888; font-size:0.9rem;">No transactions yet.</p>
+    </div>
+    <!-- AI Insights -->
+    <div class="section-card">
+        <h2>💡 AI Insights</h2>
+        <button class="btn" onclick="loadInsights()" id="insightBtn">Get Insights</button>
+        <div id="insightBox" style="display:none; margin-top:16px; line-height:1.7; font-size:0.92rem; color:#333; white-space:pre-wrap;"></div>
+        <p id="insightLoading" style="display:none; color:#888; font-size:0.9rem; margin-top:12px;">Analyzing your spending...</p>
+    </div>
+
+
 </div>
-<script>
 
-    function logout() {
-
-        fetch("/auth/logout")
-            .then(() => {
-                window.location = "/login-page"
-            });
-
-    }
-
-</script>
-
+<script src="/js/index.js"></script>
 </body>
 </html>
