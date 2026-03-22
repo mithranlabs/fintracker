@@ -18,6 +18,9 @@ public class InsightsController {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private String cachedInsight = null;
+    private long cacheTimestamp = 0;
+    private static final long CACHE_DURATION_MS = 2 * 60 * 1000;
 
     @Value("${gemini.api.key}")
     private String geminiApiKey;
@@ -88,47 +91,62 @@ public class InsightsController {
 
         // call Gemini
         try {
-            WebClient client = WebClient.create();
+            String urlStr = "https://api.groq.com/openai/v1/chat/completions";
+            System.out.println(">>> CALLING GROQ API NOW <<<");
 
-            String requestBody = """
-                {
-                    "contents": [{
-                        "parts": [{
-                            "text": "%s"
-                        }]
-                    }]
-                }
-                """.formatted(prompt.toString().replace("\"", "'").replace("\n", "\\n"));
+            java.net.URL url = new java.net.URL(urlStr);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + geminiApiKey);
+            conn.setDoOutput(true);
 
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + geminiApiKey;
+            String safePrompt = prompt.toString().replace("\"", "'").replace("\n", "\\n").replace("\r", "");
+            String requestBody = "{\"model\":\"llama-3.1-8b-instant\",\"messages\":[{\"role\":\"user\",\"content\":\"" + safePrompt + "\"}]}";
 
+            try (java.io.OutputStream os = conn.getOutputStream()) {
+                os.write(requestBody.getBytes("UTF-8"));
+            }
 
-            Map<?, ?> response = client.post()
-                    .uri(url)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block();
+            int status = conn.getResponseCode();
+            System.out.println(">>> GROQ RESPONSE STATUS: " + status);
 
-            // extract text from response
-            List<?> candidates = (List<?>) response.get("candidates");
-            Map<?, ?> first = (Map<?, ?>) candidates.get(0);
-            Map<?, ?> content = (Map<?, ?>) first.get("content");
-            List<?> parts = (List<?>) content.get("parts");
-            Map<?, ?> part = (Map<?, ?>) parts.get(0);
-            String text = (String) part.get("text");
+            if (status != 200) {
+                java.io.InputStream err = conn.getErrorStream();
+                String errBody = err != null ? new String(err.readAllBytes(), "UTF-8") : "no error body";
+                System.out.println("GROQ ERROR " + status + ": " + errBody);
+                return ResponseEntity.status(500).body(Map.of("insight", "API error " + status + ". Check console."));
+            }
+
+            java.io.InputStream is = conn.getInputStream();
+            String response = new String(is.readAllBytes(), "UTF-8");
+            is.close();
+            System.out.println(">>> GROQ RAW RESPONSE: " + response);
+
+            // parse: {"choices":[{"message":{"content":"..."}}]}
+            // parse Groq response
+            int contentStart = response.indexOf("\"content\":\"") + 11;
+            String text = response.substring(contentStart);
+
+// find the end - content ends before the next key
+            int endIndex = text.indexOf("\",\"role\"");
+            if (endIndex == -1) endIndex = text.indexOf("\"}");
+            text = text.substring(0, endIndex);
+
+            text = text.replace("\\n", "\n").replace("\\'", "'").replace("\\\"", "\"").trim();
+
+            cachedInsight = text;
+            cacheTimestamp = System.currentTimeMillis();
 
             return ResponseEntity.ok(Map.of("insight", text));
 
         } catch (Exception e) {
-            String msg = e.getMessage();
-            if (msg != null && msg.contains("429")) {
-                return ResponseEntity.status(429).body(Map.of("insight", "⚠️ Too many requests. Please wait a moment and try again."));
-            }
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("insight", "Failed to get insights. Try again."));
         }
+
+
+
 
     }
 }

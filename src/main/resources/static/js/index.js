@@ -72,6 +72,14 @@ async function loadDashboard() {
         });
     }
 }
+function formatInsight(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        .replace(/\n/g, '<br>');
+}
+
 
 function logout() {
     fetch('/auth/logout').then(() => window.location = '/login-page');
@@ -92,7 +100,7 @@ async function loadInsights() {
 
         loading.style.display = 'none';
         box.style.display = 'block';
-        box.textContent = data.insight;
+        box.innerHTML = formatInsight(data.insight);
         btn.textContent = 'Refresh Insights';
         btn.disabled = false;
     } catch (err) {
@@ -103,6 +111,7 @@ async function loadInsights() {
         btn.textContent = 'Get Insights';
     }
 }
+
 
 checkSession();
 loadDashboard();
