@@ -2,9 +2,11 @@ package com.mithran.fintracker.fin_backend.repository;
 
 import com.mithran.fintracker.fin_backend.entity.Transaction;
 import com.mithran.fintracker.fin_backend.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
+import java.util.Date;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     @Query("""
@@ -45,5 +47,9 @@ ORDER BY SUM(t.amount) DESC
     List<Object[]> getMerchantSummary(int userId);
     List<Transaction> findByUserId(int userId);
     List<Transaction> findByUser(User user);
+    @Transactional
+    void deleteByUser(User user);
+    List<Transaction> findByUserAndDateBetweenOrderByDateDesc(User user, Date start, Date end);
+
 
 }

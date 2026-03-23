@@ -72,30 +72,54 @@
 </div>
 
 <div class="container">
-
     <h1>Upload UPI Statement</h1>
 
     <input type="file" id="fileInput">
-
     <br><br>
     <label>
         <input type="checkbox" id="replaceOld">
         Replace existing transactions
     </label>
     <br>
-
     <button onclick="uploadFile()" class="btn">Upload</button>
-
     <p id="status"></p>
-
 </div>
 
-<br><br>
+<!-- SBI card now inside container too -->
+<div class="container">
+    <div class="upload-card">
+        <h3>🏦 SBI Bank Statement</h3>
+        <p class="hint">Upload your YONO SBI savings account statement PDF</p>
+
+        <div class="form-group">
+            <label>PDF File</label>
+            <input type="file" id="sbiFile" accept=".pdf" />
+        </div>
+
+        <div class="form-group">
+            <label>PDF Password</label>
+            <input type="password" id="sbiPassword" placeholder="e.g. MITHR31122004" />
+            <small>Format: First 5 letters of registered name + DDMMYYYY (date of birth)</small>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="sbiReplace" /> Replace existing transactions
+            </label>
+        </div>
+
+        <button onclick="uploadSbi()" class="btn">Upload SBI Statement</button>
+        <p id="sbiStatus"></p>
+    </div>
+</div>
+
+<br>
 
 <div class="manual-link">
     <p>OR</p>
     <a href="/add-page" class="btn">Add Transaction Manually</a>
 </div>
+
 
 <div class="container">
     <div class="history-card">

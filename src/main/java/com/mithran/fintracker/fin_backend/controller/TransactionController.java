@@ -8,12 +8,12 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
 import com.mithran.fintracker.fin_backend.repository.MerchantRuleRepository;
-import jakarta.servlet.http.HttpSession;
 import com.mithran.fintracker.fin_backend.entity.User;
 import com.mithran.fintracker.fin_backend.repository.UserRepository;
-import java.util.Optional;
-import java.util.List;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
@@ -231,4 +231,56 @@ public class TransactionController {
 
         return tx;
     }
+    @GetMapping("/filter")
+    public ResponseEntity<?> filterByDateRange(
+            @RequestParam String start,
+            @RequestParam String end,
+            HttpSession session) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.status(404).body("User not found");
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            // Start = beginning of day, End = end of day
+            Calendar startCal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+            startCal.setTime(sdf.parse(start));
+            startCal.set(Calendar.HOUR_OF_DAY, 0);
+            startCal.set(Calendar.MINUTE, 0);
+            startCal.set(Calendar.SECOND, 0);
+
+            Calendar endCal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+            endCal.setTime(sdf.parse(end));
+            endCal.set(Calendar.HOUR_OF_DAY, 23);
+            endCal.set(Calendar.MINUTE, 59);
+            endCal.set(Calendar.SECOND, 59);
+
+            List<Transaction> txns = repo
+                    .findByUserAndDateBetweenOrderByDateDesc(user, startCal.getTime(), endCal.getTime());
+
+
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Transaction t : txns) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("id", t.getId());
+                map.put("amount", t.getAmount());
+                map.put("type", t.getType());
+                map.put("category", t.getCategory() != null ? t.getCategory().getName() : "Uncategorized");
+                map.put("note", t.getNote());
+                map.put("date", t.getDate());
+                result.add(map);
+            }
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Filter failed: " + e.getMessage());
+        }
+    }
+
 }

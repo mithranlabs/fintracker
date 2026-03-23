@@ -8,6 +8,15 @@ function register() {
 
     const password =
         document.getElementById("password").value;
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    if (!validateEmail(emailValue)) {
+        document.getElementById("errorMsg").textContent = "Please enter a valid email address.";
+        return;
+    }
+
+
 
 
     fetch("/auth/register", {

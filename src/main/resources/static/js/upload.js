@@ -68,3 +68,27 @@ async function deleteUploadRecord(id) {
 }
 
 loadUploadHistory();
+async function uploadSbi() {
+    const file = document.getElementById('sbiFile').files[0];
+    const password = document.getElementById('sbiPassword').value.trim();
+    const replace = document.getElementById('sbiReplace').checked;
+    const status = document.getElementById('sbiStatus');
+
+    if (!file) { status.textContent = 'Please select a PDF file.'; return; }
+    if (!password) { status.textContent = 'Please enter the PDF password.'; return; }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('password', password);
+    formData.append('replace', replace);
+
+    status.textContent = 'Uploading...';
+
+    try {
+        const res = await fetch('/upload/sbi', { method: 'POST', body: formData });
+        const text = await res.text();
+        status.textContent = res.ok ? `✅ ${text}` : `❌ ${text}`;
+    } catch (e) {
+        status.textContent = '❌ Network error';
+    }
+}

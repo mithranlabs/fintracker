@@ -59,6 +59,20 @@
 
     <h1>Transactions</h1>
     <button onclick="clearAll()">Clear All Transactions</button>
+    <!-- Date Range Filter -->
+    <div class="filter-bar">
+        <label>From</label>
+        <input type="date" id="filterStart" />
+
+        <label>To</label>
+        <input type="date" id="filterEnd" />
+
+        <button onclick="applyFilter()">Apply</button>
+        <button onclick="clearFilter()">Clear</button>
+
+        <span id="filterInfo"></span>
+    </div>
+
 
     <table id="txTable">
 
@@ -84,6 +98,8 @@
 
 
 <script src="/js/transactions.js"></script>
+
+
 
 </body>
 </html>
