@@ -1,51 +1,47 @@
-# Fintracker (Finlytics) – Personal Finance Tracker
+# Finlytics – Personal Finance Tracker
 
-Fintracker is a personal finance tracking web application built using Spring Boot, MySQL, HTML, CSS, and JavaScript.  
-The project allows users to upload UPI transaction statements, automatically categorize expenses, and view analytics using charts.
-
-This project is designed as part of a Personal Financial Planner system.
+Finlytics is a full-stack personal finance tracking web application built with Spring Boot and vanilla JavaScript.
+It enables users to upload real Indian bank statements, automatically parse and categorize transactions, track budgets, and receive AI-powered financial insights.
 
 ---
 
 ## Features
 
-- Upload UPI / PDF transaction statements
-- Automatic transaction parsing
-- Auto categorization using rules
-- Merchant rule learning system
-- Manual transaction entry
-- Edit / delete transactions
-- Replace or append uploads
-- Category summary charts
-- Income vs Expense charts
-- Monthly summary chart
-- Top contacts / merchants summary
-- Category search dropdown
-- Dashboard UI with charts
+### Transaction Management
+- Upload SBI YONO and Google Pay UPI PDF statements (including password-protected PDFs)
+- Automatic transaction parsing with multi-line UPI support
+- Auto-categorization using keyword rules and a persistent merchant rule engine
+- Manual transaction entry, editing, and deletion
+- Date range filtering
+- CSV export (full or filtered)
+- Mark transactions as recurring with monthly suggestions
+
+### Budget & Analytics
+- Monthly budget limits per category with progress bars
+- Overspending warnings
+- Dashboard with income / expense / savings summary cards
+- Charts: category breakdown, income vs expense, monthly trend, top merchants
+
+### AI Insights
+- Financial insights powered by Groq API (LLaMA 3.1)
+- Cached per session, rendered with markdown formatting
+
+### Auth
+- Session-based authentication (register / login / logout)
+- All pages protected behind login
 
 ---
 
 ## Tech Stack
 
-Backend:
-- Java
-- Spring Boot
-- Spring Data JPA
-- Hibernate
-
-Frontend:
-- HTML
-- CSS
-- JavaScript
-- Chart.js
-
-Database:
-- MySQL
-
-Tools:
-- IntelliJ IDEA
-- Git
-- GitHub
+| Layer | Technology |
+|---|---|
+| Backend | Java, Spring Boot, Spring Data JPA, Hibernate |
+| Frontend | HTML, CSS, JavaScript, Chart.js |
+| Database | MySQL |
+| PDF Parsing | Apache PDFBox, tabula-java |
+| AI | Groq API (llama-3.1-8b-instant) |
+| Tools | IntelliJ IDEA, Git, GitHub |
 
 ---
 
@@ -53,64 +49,92 @@ Tools:
 
 ```
 src/main/java
-  controller
-  entity
-  repository
+  controller/   — Auth, Transactions, Upload, Budget, Summary, Insights, Dashboard
+  entity/       — User, Transaction, Category, Budget, MerchantRule, Upload
+  repository/   — JPA repositories
+  service/      — SBI statement parser, Recurring detection
 
 src/main/resources
-  templates
-  static
+  templates/    — HTML pages
+  static/       — CSS, JS assets
 ```
 
 ---
 
 ## How to Run
 
-1. Clone the repository
+### Prerequisites
+- Java 17+
+- MySQL 8+
+- IntelliJ IDEA (recommended)
+
+### Setup
+
+1. **Clone the repository**
 
 ```
 git clone https://github.com/mithranlabs/fintracker.git
 ```
 
-2. Open in IntelliJ
+2. **Create the database**
 
-3. Configure MySQL in `application.properties`
+Open MySQL and run:
 
-4. Run
-
-```
-FinBackendApplication.java
+```sql
+CREATE DATABASE finlytics;
 ```
 
-5. Open in browser
+3. **Configure application.properties**
+
+Create `src/main/resources/application.properties` (not committed — contains secrets):
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/finlytics
+spring.datasource.username=your_mysql_username
+spring.datasource.password=your_mysql_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+groq.api.key=your_groq_api_key
+```
+
+4. **Run the application**
+
+Run `FinBackendApplication.java` from IntelliJ, or:
+
+```bash
+./mvnw spring-boot:run
+```
+
+5. **Open in browser**
 
 ```
 http://localhost:8080
 ```
 
----
-
-## Future Improvements (Planned)
-
-- User login system
-- Budget planner
-- Goal tracking
-- Forecasting
-- Financial planner module
-- React frontend
-- Multi-user support
+Hibernate will auto-create all tables on first run.
 
 ---
 
-## Competition Details
+## Supported Bank Statements
 
-Event: Yukthi 2026 CODE CRAFTERS – WEB DEVELOPMENT (WEB WIZARDS) 
-Topic: Personal Finance Planner
+| Bank | Format | Notes |
+|---|---|---|
+| SBI YONO | PDF (password-protected) | Password: first 5 letters of name + DOB (DDMMYYYY) |
+| Google Pay | UPI PDF | Multi-line transaction support |
 
-Participants:
-- Mithran M
-- Chandan N 7975742388
-- Bharat HG 8660665494
+---
 
+## Planned Improvements
 
-College:Jnanavikas Institute Of Technology
+- RAG-based conversational AI financial advisor
+- Auto-detection of recurring transactions (ML-based)
+- Additional bank support (HDFC, ICICI, Axis)
+- Progressive Web App (PWA) with offline support
+- CSV/UPI SMS import
+
+---
+
+## Author
+
+**Mithran M**
+https://github.com/mithranlabs
