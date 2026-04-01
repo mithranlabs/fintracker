@@ -14,6 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.util.stream.Collectors;
+
+
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
@@ -282,5 +288,149 @@ public class TransactionController {
             return ResponseEntity.status(500).body("Filter failed: " + e.getMessage());
         }
     }
+    @GetMapping("/export/csv")
+    public void exportCsv(
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end,
+            HttpSession session,
+            HttpServletResponse response) {          // ← remove "throws IOException"
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) { response.setStatus(401); return; }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) { response.setStatus(404); return; }
+
+        List<Transaction> transactions;
+
+        if (start != null && end != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+                Calendar startCal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+                startCal.setTime(sdf.parse(start));
+                startCal.set(Calendar.HOUR_OF_DAY, 0);
+                startCal.set(Calendar.MINUTE, 0);
+                startCal.set(Calendar.SECOND, 0);
+
+                Calendar endCal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+                endCal.setTime(sdf.parse(end));
+                endCal.set(Calendar.HOUR_OF_DAY, 23);
+                endCal.set(Calendar.MINUTE, 59);
+                endCal.set(Calendar.SECOND, 59);
+
+                transactions = repo.findByUserAndDateBetweenOrderByDateDesc(
+                        user, startCal.getTime(), endCal.getTime());
+
+            } catch (Exception e) {
+                response.setStatus(500);
+                return;
+            }
+        } else {
+            transactions = repo.findByUserId(userId);
+        }
+
+        try {
+            response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=\"finlytics_transactions.csv\"");
+
+            PrintWriter writer = response.getWriter();
+            writer.println("Date,Description,Category,Type,Amount");
+
+            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd");
+            for (Transaction t : transactions) {
+                String dateStr = t.getDate() != null ? displayFormat.format(t.getDate()) : "";
+                String desc = t.getNote() != null ? t.getNote().replace("\"", "\"\"") : "";
+                String category = t.getCategory() != null ? t.getCategory().getName() : "Uncategorized";
+                String type = t.getType() != null ? t.getType() : "";
+                writer.printf("%s,\"%s\",%s,%s,%.2f%n",
+                        dateStr, desc, category, type, t.getAmount());
+            }
+            writer.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(500);
+        }
+    }
+    // Toggle recurring on/off
+    @PostMapping("/{id}/recurring")
+    @ResponseBody
+    public ResponseEntity<?> toggleRecurring(@PathVariable int id, HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).build();
+
+        Transaction t = repo.findById(id).orElse(null);
+        if (t == null || t.getUser() == null || t.getUser().getId() != userId)
+            return ResponseEntity.status(404).build();
+
+        t.setRecurring(!t.isRecurring());
+        repo.save(t);
+        return ResponseEntity.ok(Map.of("recurring", t.isRecurring()));
+    }
+
+    // Get recurring transactions from last month not yet present this month
+    @GetMapping("/recurring/suggestions")
+    @ResponseBody
+    public ResponseEntity<?> getRecurringSuggestions(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).build();
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.status(404).build();
+
+        // Last month date range
+        Calendar lastMonthStart = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+        lastMonthStart.add(Calendar.MONTH, -1);
+        lastMonthStart.set(Calendar.DAY_OF_MONTH, 1);
+        lastMonthStart.set(Calendar.HOUR_OF_DAY, 0);
+        lastMonthStart.set(Calendar.MINUTE, 0);
+        lastMonthStart.set(Calendar.SECOND, 0);
+
+        Calendar lastMonthEnd = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+        lastMonthEnd.add(Calendar.MONTH, -1);
+        lastMonthEnd.set(Calendar.DAY_OF_MONTH, lastMonthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        lastMonthEnd.set(Calendar.HOUR_OF_DAY, 23);
+        lastMonthEnd.set(Calendar.MINUTE, 59);
+        lastMonthEnd.set(Calendar.SECOND, 59);
+
+        // This month so far
+        Calendar thisMonthStart = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata"));
+        thisMonthStart.set(Calendar.DAY_OF_MONTH, 1);
+        thisMonthStart.set(Calendar.HOUR_OF_DAY, 0);
+        thisMonthStart.set(Calendar.MINUTE, 0);
+        thisMonthStart.set(Calendar.SECOND, 0);
+
+        List<Transaction> lastMonthTxns = repo.findByUserAndDateBetweenOrderByDateDesc(
+                user, lastMonthStart.getTime(), lastMonthEnd.getTime());
+
+        Set<String> thisMonthNotes = repo.findByUserAndDateBetweenOrderByDateDesc(
+                        user, thisMonthStart.getTime(), new Date())
+                .stream()
+                .map(t -> t.getNote() != null ? t.getNote().toLowerCase() : "")
+                .collect(Collectors.toSet());
+
+        // Filter: recurring + not yet seen this month
+        List<Map<String, Object>> suggestions = lastMonthTxns.stream()
+                .filter(Transaction::isRecurring)
+                .filter(t -> t.getNote() != null &&
+                        !thisMonthNotes.contains(t.getNote().toLowerCase()))
+                .map(t -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", t.getId());
+                    m.put("note", t.getNote());
+                    m.put("amount", t.getAmount());
+                    m.put("type", t.getType());
+                    m.put("category", t.getCategory() != null ? t.getCategory().getName() : "Uncategorized");
+                    return m;
+                })
+                .toList();
+
+        return ResponseEntity.ok(suggestions);
+    }
+
+
+
+
 
 }

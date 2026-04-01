@@ -1,4 +1,12 @@
-loadCategories();
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('note'))   document.getElementById('note').value   = params.get('note');
+    if (params.get('amount')) document.getElementById('amount').value = params.get('amount');
+    if (params.get('type'))   document.getElementById('type').value   = params.get('type');
+
+    loadCategories();
+});
+
 
 function loadCategories() {
 

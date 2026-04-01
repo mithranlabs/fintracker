@@ -11,7 +11,7 @@ function register() {
     function validateEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
-    if (!validateEmail(emailValue)) {
+    if (!validateEmail(email)) {
         document.getElementById("errorMsg").textContent = "Please enter a valid email address.";
         return;
     }

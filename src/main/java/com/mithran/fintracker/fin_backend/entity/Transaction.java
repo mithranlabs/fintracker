@@ -91,4 +91,10 @@ public class Transaction {
     public void setCategory(Category category) {
         this.category = category;
     }
+    @Column(nullable = false)
+    private boolean recurring = false;
+
+    public boolean isRecurring() { return recurring; }
+    public void setRecurring(boolean recurring) { this.recurring = recurring; }
+
 }

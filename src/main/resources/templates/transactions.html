@@ -9,7 +9,6 @@
 
 <div class="navbar">
     <h2>Finlytics</h2>
-
     <div class="nav-links">
         <a href="/">Home</a>
         <a href="/transactions-page">Transactions</a>
@@ -18,25 +17,18 @@
     </div>
 </div>
 
+<!-- Edit Box -->
 <div id="editBox" style="display:none; border:1px solid black; padding:10px; margin-bottom:20px;">
-
     <h3>Edit Transaction</h3>
-
     <input id="editId" type="hidden">
 
-    Amount:
-    <input id="editAmount"><br>
-
-    Type:
-    <input id="editType"><br>
-
-    Note:
-    <input id="editNote"><br>
+    Amount: <input id="editAmount"><br>
+    Type: <input id="editType"><br>
+    Note: <input id="editNote"><br>
 
     Category:
     <input list="categoryList" id="editCategory">
     <datalist id="categoryList"></datalist>
-
 
     <button onclick="saveEdit()">Save</button>
     <button onclick="closeEdit()">Cancel</button>
@@ -46,20 +38,20 @@
         <input type="checkbox" id="applyAll">
         Apply to all transactions with same merchant
     </label>
-
     <br>
-
     <label>
         <input type="checkbox" id="updateRule">
         Update rule for future imports
     </label>
-
 </div>
-<div class="container">
 
+<div class="container">
     <h1>Transactions</h1>
-    <button onclick="clearAll()">Clear All Transactions</button>
-    <!-- Date Range Filter -->
+
+    <!-- Recurring suggestions banner -->
+    <div id="recurringSuggestions" style="display:none;"></div>
+
+    <!-- Toolbar: filter + actions -->
     <div class="filter-bar">
         <label>From</label>
         <input type="date" id="filterStart" />
@@ -70,12 +62,15 @@
         <button onclick="applyFilter()">Apply</button>
         <button onclick="clearFilter()">Clear</button>
 
+        <a href="/transactions/export/csv" id="exportBtn">Export CSV</a>
+
+        <button onclick="clearAll()" class="btn-danger">Clear All</button>
+
         <span id="filterInfo"></span>
     </div>
 
-
+    <!-- Transactions table -->
     <table id="txTable">
-
         <thead>
         <tr>
             <th>ID</th>
@@ -84,22 +79,16 @@
             <th>Category</th>
             <th>Note</th>
             <th>Date</th>
+            <th>Recurring</th>
             <th>Action</th>
         </tr>
         </thead>
-
-        <tbody>
-
-        </tbody>
-
+        <tbody></tbody>
     </table>
 
 </div>
 
-
 <script src="/js/transactions.js"></script>
-
-
 
 </body>
 </html>

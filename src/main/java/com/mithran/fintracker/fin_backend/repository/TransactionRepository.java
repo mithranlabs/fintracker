@@ -50,6 +50,8 @@ ORDER BY SUM(t.amount) DESC
     @Transactional
     void deleteByUser(User user);
     List<Transaction> findByUserAndDateBetweenOrderByDateDesc(User user, Date start, Date end);
+    List<Transaction> findByUserIdAndRecurringTrue(Integer userId);
+
 
 
 }

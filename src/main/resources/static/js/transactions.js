@@ -65,7 +65,7 @@ function closeEdit() {
 
 function renderTransactions(data) {
     const table = document.querySelector("#txTable tbody");
-    table.innerHTML = ""; // clear before re-render
+    table.innerHTML = "";
 
     if (data.length === 0) {
         table.innerHTML = `<tr><td colspan="8" style="text-align:center">No transactions found.</td></tr>`;
@@ -73,20 +73,36 @@ function renderTransactions(data) {
     }
 
     data.forEach(tx => {
+        const categoryName = tx.category
+            ? (typeof tx.category === "string" ? tx.category : tx.category.name)
+            : "Uncategorized";
+
         const row = document.createElement("tr");
+        row.setAttribute("data-id", tx.id);
         row.innerHTML = `
             <td>${tx.id}</td>
             <td>${tx.amount}</td>
             <td>${tx.type}</td>
-            <td>${tx.category ? tx.category.name : ""}</td>
+            <td>${categoryName}</td>
             <td>${tx.note}</td>
             <td>${tx.date}</td>
-            <td><button onclick="editTx(${tx.id}, ${tx.amount}, '${tx.type}', '${tx.note}')">Edit</button></td>
-            <td><button onclick="deleteTx(${tx.id})">Delete</button></td>
+            <td>
+                <button class="recurring-btn ${tx.recurring ? 'recurring-active' : ''}"
+                    title="${tx.recurring ? 'Recurring (click to unmark)' : 'Mark as recurring'}"
+                    onclick="toggleRecurring(${tx.id}, this)">
+                    ${tx.recurring ? '🔁' : '↩'}
+                </button>
+            </td>
+            <td class="action-cell">
+                <button onclick="editTx(${tx.id}, ${tx.amount}, '${tx.type}', '${tx.note}')">Edit</button>
+                <button onclick="deleteTx(${tx.id})">Delete</button>
+            </td>
         `;
         table.appendChild(row);
     });
 }
+
+
 
 
 function loadTransactions() {
@@ -115,6 +131,7 @@ function applyFilter() {
             document.getElementById("filterInfo").textContent =
                 `Showing ${data.length} transaction(s) from ${start} to ${end}`;
             renderTransactions(data);
+            updateExportLink();
         });
 }
 
@@ -123,7 +140,47 @@ function clearFilter() {
     document.getElementById("filterEnd").value = "";
     document.getElementById("filterInfo").textContent = "";
     loadTransactions();
+    updateExportLink();
+}
+function updateExportLink() {
+    const start = document.getElementById('filterStart')?.value;
+    const end = document.getElementById('filterEnd')?.value;
+    const btn = document.getElementById('exportBtn');
+    if (start && end) {
+        btn.href = `/transactions/export/csv?start=${start}&end=${end}`;
+    } else {
+        btn.href = '/transactions/export/csv';
+    }
+}
+function toggleRecurring(id, btn) {
+    fetch(`/transactions/${id}/recurring`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            btn.textContent = data.recurring ? "🔁" : "↩";
+            btn.title = data.recurring ? "Recurring (click to unmark)" : "Mark as recurring";
+            btn.classList.toggle("recurring-active", data.recurring);
+        });
+}
+
+function loadRecurringSuggestions() {
+    fetch("/transactions/recurring/suggestions")
+        .then(res => res.json())
+        .then(data => {
+            const banner = document.getElementById("recurringSuggestions");
+            if (!data.length) { banner.style.display = "none"; return; }
+
+            banner.style.display = "block";
+            banner.innerHTML = `<strong>🔁 ${data.length} recurring transaction(s) due this month:</strong><br>` +
+                data.map(t => `
+                    <span class="suggestion-chip"
+                        onclick="window.location.href='/add-page?note=${encodeURIComponent(t.note)}&amount=${t.amount}&type=${t.type}'">
+                        ${t.note} — ₹${t.amount} (${t.type})
+                    </span>
+                `).join("");
+        });
 }
 
 
 loadTransactions();
+updateExportLink();
+loadRecurringSuggestions();
