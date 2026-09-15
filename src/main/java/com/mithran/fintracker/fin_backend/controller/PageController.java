@@ -8,7 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PageController {
 
     @GetMapping("/")
-    public String home() {
+    public String landing() {
+        return "landing";
+    }
+
+    @GetMapping("/dashboard-page")
+    public String dashboard() {
         return "index";
     }
 

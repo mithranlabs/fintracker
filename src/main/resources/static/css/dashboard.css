@@ -1,0 +1,241 @@
+/* BASE */
+body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #0b0f1a;
+    color: #e5e7eb;
+}
+
+/* NAVBAR */
+.navbar {
+    background: #0f172a;
+    padding: 16px 30px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #1f2937;
+}
+
+.logo {
+    font-weight: 700;
+    color: #38bdf8;
+}
+
+.nav-links a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #9ca3af;
+}
+
+.nav-links a:hover {
+    color: #38bdf8;
+}
+
+/* LAYOUT */
+.dashboard {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.header p {
+    color: #6b7280;
+}
+
+/* NEON BUTTON */
+.neon-btn {
+    background: transparent;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.neon-btn:hover {
+    background: #38bdf8;
+    color: #0b0f1a;
+    box-shadow: 0 0 15px #38bdf8;
+}
+
+/* CARDS */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: #111827;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #1f2937;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 20px rgba(56,189,248,0.15);
+}
+
+.card p {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.card h2 {
+    margin-top: 8px;
+    font-size: 1.8rem;
+}
+
+.card.income h2 { color: #22c55e; }
+.card.expense h2 { color: #ef4444; }
+.card.savings h2 { color: #38bdf8; }
+
+/* GRID */
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.left, .right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* PANELS */
+.panel {
+    background: #111827;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #1f2937;
+}
+
+/* NEON PANEL */
+.neon-panel {
+    box-shadow: 0 0 25px rgba(56,189,248,0.15);
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    color: #6b7280;
+    font-size: 0.8rem;
+    text-align: left;
+    padding-bottom: 8px;
+}
+
+td {
+    padding: 10px 0;
+    border-top: 1px solid #1f2937;
+}
+
+tr:hover td {
+    background: #1f2937;
+}
+
+/* INSIGHTS */
+#insightBox {
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+#insightLoading {
+    display: none;
+    color: #6b7280;
+}
+
+/* EMPTY */
+#noRecentMsg {
+    color: #6b7280;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== BUDGET BARS (NEON DARK) ===== */
+
+.budget-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.budget-bar-label {
+    width: 100px;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.budget-bar-track {
+    flex: 1;
+    height: 10px;
+    background: #1f2937;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* THE ACTUAL FILL */
+.budget-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* COLOR STATES */
+.budget-bar-fill.ok {
+    background: #22c55e;
+    box-shadow: 0 0 10px rgba(34,197,94,0.6);
+}
+
+.budget-bar-fill.warn {
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245,158,11,0.6);
+}
+
+.budget-bar-fill.over {
+    background: #ef4444;
+    box-shadow: 0 0 12px rgba(239,68,68,0.7);
+}
+
+/* RIGHT SIDE META */
+.budget-bar-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+    width: 110px;
+    text-align: right;
+}
+
+.budget-bar-track::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}

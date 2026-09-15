@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Finlytics</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">Finlytics</div>
+  <div class="nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/transactions-page">Transactions</a>
+    <a href="/upload-page">Upload</a>
+    <a href="/summary-page">Analytics</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</div>
+
+<div class="dashboard">
+
+  <div class="header">
+    <div>
+      <h1 id="welcomeMsg">Welcome back 👾</h1>
+      <p id="monthLabel"></p>
+    </div>
+    <button class="neon-btn" onclick="loadInsights()" id="insightBtn">
+      ⚡ AI Insights
+    </button>
+  </div>
+
+  <div class="card-grid">
+    <div class="card income">
+      <p>Income</p>
+      <h2 id="cardIncome">₹ —</h2>
+    </div>
+    <div class="card expense">
+      <p>Expenses</p>
+      <h2 id="cardExpense">₹ —</h2>
+    </div>
+    <div class="card savings">
+      <p>Savings</p>
+      <h2 id="cardSavings">₹ —</h2>
+    </div>
+    <div class="card neutral">
+      <p>Transactions</p>
+      <h2 id="cardCount">—</h2>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <div class="left">
+
+      <div class="panel" id="budgetSection" style="display:none;">
+        <h3>Budget Health</h3>
+        <div id="budgetBars"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Recent Transactions</h3>
+
+        <table id="recentTable" style="display:none;">
+          <thead>
+          <tr>
+            <th>Note</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Date</th>
+          </tr>
+          </thead>
+          <tbody id="recentBody"></tbody>
+        </table>
+
+        <p id="noRecentMsg">No transactions yet.</p>
+      </div>
+
+    </div>
+
+    <div class="right">
+
+      <div class="panel neon-panel">
+        <h3>AI Insights</h3>
+        <div id="insightLoading">Analyzing your data...</div>
+        <div id="insightBox"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="/js/index.js"></script>
+</body>
+</html>

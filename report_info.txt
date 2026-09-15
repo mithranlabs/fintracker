@@ -1,0 +1,221 @@
+===============================================================================
+                       PROJECT REPORT INFORMATION - FINLYTICS
+===============================================================================
+
+CHAPTER 1: INTRODUCTION
+-------------------------------------------------------------------------------
+
+1.1 MOTIVATION
+-------------------------------------------------------------------------------
+In recent years, digital financial transactions have experienced explosive growth, particularly in India driven by the Unified Payments Interface (UPI), mobile banking applications, and digital wallets. Millions of daily micro-transactions—ranging from grocery purchases and food delivery to utility bill payments—are processed digitally. While digital payments offer unprecedented convenience, they simultaneously create a significant challenge for personal financial management (PFM). Individuals frequently find themselves making scores of transactions monthly across multiple platforms (e.g., SBI YONO, Google Pay, PhonePe, Paytm), leading to fragmented records, lack of visibility into cumulative spending habits, and financial disorganization.
+
+Traditional expense tracking methods, such as manual ledger logging or static spreadsheet entry (e.g., Microsoft Excel, Google Sheets), require continuous discipline and manual effort. Research indicates that a majority of users abandon manual tracking apps within a few weeks due to user fatigue and administrative burden. Conversely, existing automated mobile apps often rely on reading private user SMS messages—raising severe privacy and security concerns—or fail to support native, password-protected Indian bank PDF statements.
+
+Furthermore, traditional PFM tools merely present static tables or basic charts without offering actionable, context-aware financial guidance. Users are left with raw data but lack intelligent advice on how to optimize their budget, reduce discretionary overspending, or improve net savings.
+
+This project, Finlytics (FinTracker), is motivated by the critical need for a privacy-focused, intelligent, full-stack personal finance tracker tailored to the modern financial ecosystem. By automating the parsing of password-protected Indian bank statements (such as SBI YONO) and multi-line Google Pay UPI PDFs, implementing a dynamic hybrid categorization engine, providing intuitive interactive visual analytics, and incorporating Large Language Model (LLM) powered financial advice, Finlytics bridges the gap between raw transaction data and meaningful, actionable financial decision-making.
+
+
+1.2 PROBLEM STATEMENT
+-------------------------------------------------------------------------------
+Modern personal finance tracking is hindered by several core challenges:
+
+1. Complex & Encrypted Statement Formats: Indian bank PDF statements (e.g., SBI YONO) and UPI transaction logs (e.g., Google Pay) are structured heterogeneously. They often employ PDF password encryption (e.g., combination of user name and date of birth), multi-line transaction narrations, embedded bank reference codes, and varying tabular layouts. Standard off-the-shelf text extractors fail to parse these documents accurately.
+
+2. High Friction of Manual Expense Tracking: Manual entry of daily expenses leads to user fatigue, data omissions, human calculation errors, and eventual abandonment of tracking altogether.
+
+3. Cryptic Transaction Narratives & Poor Categorization: Raw bank narrations (such as "UPI/DR/43512398712/SWIGGY/PAYMENT...") contain extraneous technical codes and unorganized merchant details. Without intelligent parsing and customizable categorization rules, transactions remain uncategorized or incorrectly grouped, rendering expense analysis ineffective.
+
+4. Static Visualizations without Actionable Insights: Existing PFM solutions offer basic graphical summaries (bar charts or pie charts) but lack intelligent advisory capabilities. They do not interpret financial trends, identify top overspending channels, or offer personalized monetary advice tailored to the user's specific financial behavior.
+
+5. Privacy Risks in Automated Tracking: Commercial financial apps frequently demand intrusive permissions, such as full read-access to personal SMS messages or direct linking to bank accounts via open-banking APIs, exposing sensitive financial and identity data to third-party privacy breaches.
+
+
+1.3 PROPOSED SYSTEM
+-------------------------------------------------------------------------------
+The proposed system, Finlytics, is a robust, full-stack, web-based Personal Finance Management application built using Spring Boot, Spring Data JPA, Hibernate, MySQL, HTML5, CSS3, Vanilla JavaScript, Chart.js, Apache PDFBox, and the Groq API (LLaMA 3.1 8B Instant model).
+
+Finlytics solves the aforementioned problems through the following integrated subsystems:
+
+1. Automated Multi-Format Statement Parser: 
+   A dedicated Java parsing module (`SbiStatementParser`) utilizing Apache PDFBox capable of loading password-protected bank PDFs (e.g., SBI YONO) and multi-line Google Pay UPI PDFs. The parser uses advanced Regular Expressions (Regex) to extract transaction dates, transaction types (WDL, DEP, CSH, TRF, UPI), debit/credit amounts, running balances, and clean merchant/narration strings while discarding header/footer noise.
+
+2. Hybrid Rule-Based & Learnt Categorization Engine:
+   A multi-tiered categorization mechanism that evaluates transaction descriptions against:
+   a) User-defined persistent merchant rules stored in MySQL (`MerchantRule` entity).
+   b) A fallback keyword dictionary mapping common merchant indicators (e.g., Swiggy/Zomato to "Food", Petrol/IRCTC/Uber to "Travel", Amazon/Flipkart to "Shopping").
+   c) Default category assignments ("Salary" for income, "Personal" for expense) to ensure 100% of transactions are classified.
+
+3. Dynamic Budgeting & Visual Analytics Dashboard:
+   An interactive web interface powered by Chart.js featuring:
+   - Summary cards displaying Total Income, Total Expenses, and Net Savings.
+   - Categorical expense breakdown pie/doughnut charts and income vs. expense comparisons.
+   - Monthly trend graphs and top merchant spending leaderboards.
+   - Category budget tracking with dynamic visual progress bars and overspending warning flags.
+
+4. AI-Driven Financial Advisor (LLM Integration):
+   An intelligent financial advisory endpoint (`InsightsController`) that aggregates the user's last 30-day spending data (category breakdown, net savings, top merchants) into a structured prompt payload. It leverages the Groq API executing the `llama-3.1-8b-instant` model to generate concise, tailored, actionable monetary recommendations. Responses are cached per session to minimize API latencies and resource usage.
+
+5. Privacy-Centric & Secure Architecture:
+   Runs entirely under user control using session-based authentication (Register, Login, Logout) and isolated database tables, ensuring sensitive personal financial data remains private and secure without external SMS reading or open-banking data sharing.
+
+
+1.4 OBJECTIVES
+-------------------------------------------------------------------------------
+The primary objectives of the Finlytics project are:
+
+1. To design and implement an automated bank statement parsing engine capable of handling password-protected PDF files (SBI YONO) and multi-line UPI statements (Google Pay).
+2. To build a robust transaction management system offering automated ingestion, manual CRUD operations, date-range filtering, and standard CSV data export.
+3. To develop a hybrid transaction categorization system incorporating persistent merchant-to-category rules and multi-keyword heuristic dictionaries.
+4. To implement a budget tracking module that allows users to define monthly spending limits per category and receive visual overspending alerts.
+5. To construct an intuitive, responsive web dashboard with interactive Chart.js analytics for clear financial visualization.
+6. To integrate Large Language Model (LLM) capabilities via Groq API (LLaMA 3.1) to generate automated, context-aware, personalized financial insights and actionable advice based on 30-day transactional trends.
+7. To enforce secure user authentication and strict data privacy through session-based authorization and user-isolated database storage.
+
+
+1.5 METHODOLOGY
+-------------------------------------------------------------------------------
+The development of Finlytics follows a structured software engineering lifecycle utilizing the Model-View-Controller (MVC) design pattern and RESTful web service architecture. The methodology comprises five key phases:
+
+Phase 1: Architecture & Data Modeling
+- Database Schema Design: Relational database tables designed in MySQL mapped via Spring Data JPA entities:
+  * `User`: Stores user credentials and profile details.
+  * `Transaction`: Stores individual debit/credit entries, date, amount, type, merchant note, user reference, and category reference.
+  * `Category`: Defines financial categories (Food, Travel, Shopping, Salary, Utilities, etc.) and type (income/expense).
+  * `Budget`: Stores user-configured monthly category budget limits.
+  * `MerchantRule`: Maps specific merchant keywords to user-selected categories.
+  * `Upload`: Maintains audit logs of processed bank statement files.
+
+Phase 2: PDF Parser Development (Data Ingestion)
+- Apache PDFBox Integration: Uploaded files are ingested via Spring `MultipartFile` and unlocked using the user-provided PDF password.
+- Regex Pipeline Execution:
+  * Line Tokenization: PDF text content is extracted via `PDFTextStripper` and split into lines.
+  * Date Pattern Matching: Identifies transaction start markers using regex patterns (`DATE_LINE` and `DATE_INLINE_LINE`).
+  * Narrative Assembly: Accumulates multi-line transaction narratives while skipping page headers, footers, and branch metadata.
+  * Amount Pattern Matching: Uses `AMOUNT_LINE` regex to differentiate between debit (expense) and credit (income) numerical values.
+  * UPI Merchant Extraction: Applies `UPI_NAME` regex (`UPI/(DR|CR|REVERSAL)/...`) to extract clean merchant identifiers.
+
+Phase 3: Categorization & Persistence Engine
+- Rule Evaluation Order:
+  1. Primary Check: Query `MerchantRule` repository for exact or partial keyword matches.
+  2. Secondary Check: Iterate through static keyword dictionaries (`Food`, `Travel`, `Shopping`).
+  3. Tertiary Check: Assign system fallback category (`Salary` or `Personal`).
+- Persistence: Store structured `Transaction` objects linked to the logged-in `User` entity within MySQL database.
+
+Phase 4: Analytics & AI Insights Endpoint
+- Aggregation Pipeline: Calculates 30-day rolling aggregate statistics (income sum, expense sum, category-wise expenditure, top merchant).
+- LLM Prompt Construction: Formats aggregated metrics into a natural language prompt instructing the Groq LLM model to adopt a personal financial advisor role.
+- Asynchronous API Call & Caching: Sends HTTP POST payload to Groq API (`llama-3.1-8b-instant`), parses JSON completion response, and caches result in memory (`CACHE_DURATION_MS = 2 minutes`) for optimal performance.
+
+Phase 5: User Interface & Verification
+- UI Implementation: HTML5, modern CSS styling, and Vanilla JavaScript (`fetch` API) interacting with Spring REST Controllers (`AuthController`, `TransactionController`, `UploadController`, `BudgetController`, `InsightsController`, `DashboardController`).
+- Chart.js Rendering: Renders interactive charts for categorical distribution, income vs. expense, monthly trends, and budget progress bars.
+- Verification: End-to-end testing including statement uploads, password verification, rule creation, budget limit testing, CSV export verification, and AI insight accuracy validation.
+
+
+===============================================================================
+CHAPTER 2: LITERATURE REVIEW
+-------------------------------------------------------------------------------
+
+2.1 OVERVIEW OF PERSONAL FINANCE MANAGEMENT (PFM) SYSTEMS
+-------------------------------------------------------------------------------
+Personal Finance Management (PFM) systems have evolved as fundamental digital tools aiding individuals in tracking cash flows, formulating budgets, managing debt, and planning savings. Early literature in consumer economics emphasizes that active monitoring of personal financial transactions significantly improves financial awareness, reduces impulse spending, and improves personal savings rates.
+
+Historically, PFM tools were classified into three main generations:
+1. First Generation (Manual Bookkeeping): Paper ledgers, physical envelope budgeting systems, and offline spreadsheet tools (Microsoft Excel).
+2. Second Generation (Desktop & Early Web Software): Intuit Quicken, Microsoft Money, and downloadable desktop applications requiring manual input or file imports (QIF/OFX format).
+3. Third Generation (Cloud-Based & Mobile PFM Apps): Mint, YNAB (You Need A Budget), PocketGuard, and mobile apps offering automatic bank syncing or SMS tracking.
+
+Recent academic studies highlight that despite the availability of third-generation apps, adoption barriers persist due to data privacy concerns, complex setup processes, and inability to handle region-specific financial formats (such as Indian UPI payment logs and password-protected PDF statements).
+
+
+2.2 EVOLUTION OF TRANSACTION TRACKING: MANUAL VS. AUTOMATED METHODS
+-------------------------------------------------------------------------------
+Literature comparing manual and automated expense tracking methodologies highlights a stark trade-off between user friction and data accuracy:
+
+- Manual Tracking Systems:
+  * Strengths: Total user privacy, high awareness during entry, no integration required.
+  * Weaknesses: High cognitive load, prone to human error, omission of micro-transactions (e.g., small cash/UPI payments), and high abandonment rates (over 70% within 30 days according to PFM behavioral studies).
+
+- Automated Tracking via SMS Scraping:
+  * Strengths: Low user friction, real-time transaction detection.
+  * Weaknesses: Intrusive permissions (requires full access to personal SMS inbox), inability to capture details when SMS notification fails, lack of support for detailed itemized statements, and restriction to Android mobile platforms (iOS restricts SMS reading).
+
+- Automated Tracking via PDF Statement Parsing:
+  * Strengths: High fidelity, captures official bank records, supports multi-line transaction narratives, works cross-platform (web and mobile), respects user privacy by operating on user-uploaded files without background message scanning.
+  * Weaknesses: Format variability across financial institutions, password encryption, requirement of specialized PDF parsing logic.
+
+The literature concludes that PDF statement parsing provides the ideal middle ground for users seeking privacy-conscious, high-fidelity automated tracking.
+
+
+2.3 BANK STATEMENT INGESTION & PARSING TECHNIQUES
+-------------------------------------------------------------------------------
+Document processing literature divides electronic bank statement parsing into three primary techniques:
+
+1. Optical Character Recognition (OCR):
+   Tools like Tesseract OCR or AWS Textract scan statement images/PDFs. While effective for scanned paper documents, OCR requires heavy processing power, is prone to character recognition errors (e.g., mistaking '0' for 'O' or '1' for 'l'), and is unnecessarily computationally expensive for native digital PDFs.
+
+2. Table Extraction Frameworks (e.g., Tabula, Apache PDFBox):
+   Frameworks designed to extract raw text and tabular structures directly from native digital PDF streams. Apache PDFBox is widely acknowledged in open-source software literature for its low memory footprint, speed, and robust handling of PDF document security, including decryption via user password parameters.
+
+3. Regex-Driven Tokenization:
+   In financial domain applications, raw extracted text streams must be converted into structured database records. Research demonstrates that combining PDFTextStripper output with deterministic Regular Expressions (Regex) allows efficient extraction of date markers, transaction types, debit/credit fields, and multi-line narrations even when tabular gridlines are missing from the PDF structure.
+
+
+2.4 CATEGORIZATION ENGINES: RULE-BASED VS. MACHINE LEARNING APPROACHES
+-------------------------------------------------------------------------------
+Categorizing unorganized financial transactions is a central research topic in financial informatics. Existing literature analyzes two dominant paradigms:
+
+1. Machine Learning (ML) Classifiers:
+   Supervised learning algorithms (such as Naive Bayes, Support Vector Machines, and Random Forests) and Natural Language Processing (NLP) models (TF-IDF, word embeddings) have been employed to classify transaction strings. While effective at scale, ML models require large, pre-labeled training datasets, suffer from cold-start problems for new users, and can misclassify unique merchant names without continuous retraining.
+
+2. Rule-Based & Keyword Mapping Engines:
+   Rule-based systems apply deterministic pattern matching (e.g., checking if narration contains "SWIGGY" or "PETROL"). Literature indicates that rule-based engines achieve near 100% precision for known merchants and allow instantaneous user customization (e.g., mapping a specific local merchant name to a custom category).
+
+3. Hybrid Categorization Architecture:
+   Recent literature strongly advocates a hybrid approach: leveraging persistent user-defined rules as high-priority overrides, combined with static keyword dictionaries for general merchants, and fallback default categories. This hybrid architecture eliminates training overhead while maintaining high accuracy and user customization—an approach directly adopted in Finlytics.
+
+
+2.5 INTEGRATION OF GENERATIVE ARTIFICIAL INTELLIGENCE (AI) IN FINANCIAL ADVISORY
+-------------------------------------------------------------------------------
+The emergence of Large Language Models (LLMs) such as OpenAI GPT-4, Meta LLaMA 3, and Anthropic Claude represents a paradigm shift in financial technology. Traditional PFM systems relied on hardcoded heuristic logic to output static tips (e.g., "You spent 30% on food"). In contrast, LLM-driven advisory engines offer natural language synthesis, contextual understanding, and personalized financial coaching.
+
+Key findings from recent AI in Fintech literature include:
+- Context Aggregation: LLMs perform exceptionally well when provided with aggregated metadata summaries (total income, expenses, category spending, top merchants) rather than raw individual transaction logs, preserving privacy while enabling deep insights.
+- LLaMA 3.1 Architecture: Meta's LLaMA 3.1 8B Instant model (accessed via high-speed inference platforms like Groq API) provides fast inference times (< 1 second) and high reasoning capabilities suitable for real-time web applications.
+- Latency & Cost Optimization: Literature emphasizes the necessity of prompt sanitization and session caching strategies (e.g., caching insight responses for 2-5 minutes) to avoid redundant API calls, control computational overhead, and deliver responsive user experiences.
+
+
+2.6 COMPARATIVE STUDY / LITERATURE COMPARISON MATRIX
+-------------------------------------------------------------------------------
+
++--------------------------+------------------+-------------------+-------------------+-------------------+
+| Feature / Dimension      | Manual Tracker   | SMS-Based Apps    | Generic PDF       | Proposed System   |
+|                          | (Excel / Sheets) | (e.g., Walnut)    | Converters        | (Finlytics)       |
++--------------------------+------------------+-------------------+-------------------+-------------------+
+| Automated PDF Parsing    | No               | No                | Partial (Text)    | Yes (Full)        |
+| Password PDF Support     | No               | No                | No                | Yes (SBI YONO)    |
+| Privacy / Data Security  | High             | Low (Scans SMS)   | Medium            | High (Isolated DB)|
+| Smart Categorization     | Manual           | Automated         | None              | Hybrid Engine     |
+| Persistent User Rules    | Manual           | Limited           | None              | Yes (MerchantRule)|
+| Budget Overspend Alerts  | Manual formulas  | Yes               | No                | Yes (Visual progress)|
+| LLM Financial Advice     | No               | No                | No                | Yes (Groq/LLaMA3.1)|
+| Cross-Platform Web UI    | Yes              | Mobile Only       | Web Only          | Yes (Full-Stack)  |
+| Open Source / Self-Host  | Yes              | Proprietary       | Variable          | Yes               |
++--------------------------+------------------+-------------------+-------------------+-------------------+
+
+
+2.7 IDENTIFIED RESEARCH GAPS & RATIONALE FOR FINLYTICS
+-------------------------------------------------------------------------------
+Based on the literature review and comparative analysis, the following research and technological gaps were identified:
+
+1. Lack of Integrated Support for Indian Bank PDF Formats: Most global or open-source PFM tools lack dedicated parsing patterns for Indian banking statements (such as password-protected SBI YONO PDFs and multi-line Google Pay UPI narratives).
+2. Privacy Vulnerabilities in Automated Mobile Trackers: Popular automated mobile tracking applications compromise user privacy by requiring full SMS access permissions.
+3. Absence of Actionable AI Advisory in Lightweight Web PFM Systems: Existing lightweight or self-hosted PFM web tools provide charts but lack generative AI capabilities to analyze 30-day financial behaviors and output natural language recommendations.
+
+Rationale for Finlytics:
+Finlytics directly addresses these research gaps by synthesizing password-protected PDF parsing (Apache PDFBox), a hybrid merchant categorization engine, interactive visual analytics (Chart.js), and generative LLM financial advisory (Groq LLaMA 3.1) into a single, secure, full-stack Spring Boot web application.
+
+===============================================================================
+END OF REPORT INFO
+===============================================================================

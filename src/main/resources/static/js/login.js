@@ -15,7 +15,7 @@ function login() {
         .then(r => r.text())
         .then(t => {
             if (t === "OK") {
-                window.location.href = "/";  // ✅ use .href for clarity
+                window.location.href = "/dashboard-page";  //use .href for clarity
             } else {
                 alert(t);
             }
