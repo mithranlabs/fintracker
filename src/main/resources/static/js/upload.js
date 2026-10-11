@@ -92,3 +92,7 @@ async function uploadSbi() {
         status.textContent = '❌ Network error';
     }
 }
+
+function logout() {
+    fetch('/auth/logout').then(() => window.location = '/login-page');
+}

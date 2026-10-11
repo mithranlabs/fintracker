@@ -350,3 +350,7 @@ document.getElementById("budgetMonth").addEventListener("change", loadBudgets);
 loadCategories();
 loadBudgets();
 
+
+function logout() {
+    fetch('/auth/logout').then(() => window.location = '/login-page');
+}

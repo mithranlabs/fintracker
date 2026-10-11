@@ -125,3 +125,7 @@ function addTx() {
         });
 
 }
+
+function logout() {
+    fetch('/auth/logout').then(() => window.location = '/login-page');
+}

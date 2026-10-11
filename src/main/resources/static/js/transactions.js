@@ -184,3 +184,7 @@ function loadRecurringSuggestions() {
 loadTransactions();
 updateExportLink();
 loadRecurringSuggestions();
+
+function logout() {
+    fetch('/auth/logout').then(() => window.location = '/login-page');
+}
