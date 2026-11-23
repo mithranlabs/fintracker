@@ -96,3 +96,178 @@ async function uploadSbi() {
 function logout() {
     fetch('/auth/logout').then(() => window.location = '/login-page');
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Universal Parser Functions
+// ═══════════════════════════════════════════════════════════════════════════
+
+let parsedTransactions = [];
+let uploadedFileName = '';
+
+async function uploadUniversal() {
+    const file = document.getElementById('universalFile').files[0];
+    const replace = document.getElementById('universalReplace').checked;
+    const status = document.getElementById('universalStatus');
+    const preview = document.getElementById('universalPreview');
+
+    if (!file) {
+        status.textContent = 'Please select a file.';
+        return;
+    }
+
+    uploadedFileName = file.name;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    status.textContent = '⏳ Parsing statement...';
+    preview.style.display = 'none';
+
+    try {
+        const res = await fetch('/upload/universal', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!data.success) {
+            status.textContent = `❌ ${data.message}`;
+            return;
+        }
+
+        // Store parsed transactions
+        parsedTransactions = data.transactions;
+
+        // Show preview
+        displayUniversalPreview(data);
+        status.textContent = `✅ ${data.message}`;
+        preview.style.display = 'block';
+
+    } catch (e) {
+        status.textContent = '❌ Network error or parsing failed';
+        console.error(e);
+    }
+}
+
+function displayUniversalPreview(data) {
+    const tbody = document.getElementById('previewTableBody');
+    const summary = document.getElementById('previewSummary');
+    const reviewWarning = document.getElementById('reviewWarning');
+    const reviewCount = document.getElementById('reviewCount');
+
+    tbody.innerHTML = '';
+
+    // Show summary
+    const method = data.parsingMethod === 'HEURISTIC' ? '🤖 Heuristic' : '🧠 AI-assisted';
+    summary.innerHTML = `
+        <strong>Total:</strong> ${data.totalTransactions} transactions | 
+        <strong>Method:</strong> ${method} | 
+        <strong>Needs Review:</strong> ${data.needsReviewCount}
+    `;
+
+    // Show review warning if needed
+    if (data.needsReviewCount > 0) {
+        reviewWarning.style.display = 'block';
+        reviewCount.textContent = `${data.needsReviewCount} transaction(s) have UNKNOWN direction.`;
+    } else {
+        reviewWarning.style.display = 'none';
+    }
+
+    // Build table rows
+    data.transactions.forEach((txn, index) => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #eee';
+
+        // Confidence badge
+        const confPercent = Math.round(txn.confidence * 100);
+        let confBadge = '';
+        if (txn.confidence >= 0.8) {
+            confBadge = `<span style="background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px; font-size: 0.85em;">${confPercent}%</span>`;
+        } else if (txn.confidence >= 0.6) {
+            confBadge = `<span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 3px; font-size: 0.85em;">${confPercent}%</span>`;
+        } else {
+            confBadge = `<span style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 3px; font-size: 0.85em;">${confPercent}%</span>`;
+        }
+
+        // Direction dropdown
+        const directionSelect = `
+            <select onchange="updateDirection(${index}, this.value)" 
+                    style="padding: 4px 8px; border: 1px solid ${txn.needsReview ? '#dc3545' : '#ced4da'}; border-radius: 4px; background: ${txn.needsReview ? '#fff3cd' : 'white'};">
+                <option value="DEBIT" ${txn.direction === 'DEBIT' ? 'selected' : ''}>Debit ↗</option>
+                <option value="CREDIT" ${txn.direction === 'CREDIT' ? 'selected' : ''}>Credit ↘</option>
+                <option value="UNKNOWN" ${txn.direction === 'UNKNOWN' ? 'selected' : ''}>❓ Unknown</option>
+            </select>
+        `;
+
+        // Amount formatting
+        const amountFormatted = '₹' + txn.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        tr.innerHTML = `
+            <td style="padding: 8px;">${txn.date}</td>
+            <td style="padding: 8px; max-width: 300px; overflow: hidden; text-overflow: ellipsis;" title="${txn.narration}">${txn.narration}</td>
+            <td style="padding: 8px; text-align: right; font-weight: bold;">${amountFormatted}</td>
+            <td style="padding: 8px; text-align: center;">${directionSelect}</td>
+            <td style="padding: 8px; text-align: center;">${confBadge}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+function updateDirection(index, newDirection) {
+    parsedTransactions[index].direction = newDirection;
+    parsedTransactions[index].needsReview = (newDirection === 'UNKNOWN');
+
+    // Recount needs review
+    const needsReview = parsedTransactions.filter(t => t.needsReview).length;
+    const reviewWarning = document.getElementById('reviewWarning');
+    const reviewCount = document.getElementById('reviewCount');
+
+    if (needsReview > 0) {
+        reviewWarning.style.display = 'block';
+        reviewCount.textContent = `${needsReview} transaction(s) have UNKNOWN direction.`;
+    } else {
+        reviewWarning.style.display = 'none';
+    }
+}
+
+async function saveUniversalTransactions() {
+    const replace = document.getElementById('universalReplace').checked;
+    const status = document.getElementById('universalStatus');
+    const saveBtn = document.getElementById('saveBtn');
+
+    // Check for UNKNOWN directions
+    const unknownCount = parsedTransactions.filter(t => t.needsReview).length;
+    if (unknownCount > 0) {
+        status.textContent = `❌ Cannot save: ${unknownCount} transaction(s) still have UNKNOWN direction. Please correct them first.`;
+        return;
+    }
+
+    saveBtn.disabled = true;
+    status.textContent = '⏳ Saving transactions...';
+
+    try {
+        const res = await fetch('/upload/universal/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                transactions: parsedTransactions,
+                replaceExisting: replace,
+                fileName: uploadedFileName
+            })
+        });
+
+        const text = await res.text();
+
+        if (res.ok) {
+            status.textContent = `✅ ${text}`;
+            document.getElementById('universalPreview').style.display = 'none';
+            document.getElementById('universalFile').value = '';
+            loadUploadHistory();
+        } else {
+            status.textContent = `❌ ${text}`;
+            saveBtn.disabled = false;
+        }
+
+    } catch (e) {
+        status.textContent = '❌ Failed to save transactions';
+        saveBtn.disabled = false;
+        console.error(e);
+    }
+}

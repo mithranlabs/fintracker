@@ -35,6 +35,55 @@
 <!-- SBI card now inside container too -->
 <div class="container">
     <div class="upload-card">
+        <h1>🔄 Universal Bank Statement Parser</h1><br><br>
+        <p class="hint">Upload any bank statement (PDF or TXT) - works with most formats</p><br>
+
+        <div class="form-group">
+            <label>Statement File (PDF or TXT)</label>
+            <input type="file" id="universalFile" accept=".pdf,.txt" />
+        </div><br><br>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="universalReplace" /> Replace existing transactions
+            </label>
+        </div>
+
+        <button onclick="uploadUniversal()" class="btn">Parse Statement</button>
+        <p id="universalStatus"></p>
+        
+        <!-- Preview section (hidden initially) -->
+        <div id="universalPreview" style="display: none; margin-top: 20px;">
+            <h3>📋 Preview Parsed Transactions</h3>
+            <p id="previewSummary"></p>
+            
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin: 10px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f5f5f5; position: sticky; top: 0;">
+                            <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Date</th>
+                            <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Description</th>
+                            <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">Amount</th>
+                            <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Direction</th>
+                            <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; display: none;" id="reviewWarning">
+                <strong>⚠️ Review Required:</strong> <span id="reviewCount"></span> transactions need direction correction before saving.
+            </div>
+            
+            <button onclick="saveUniversalTransactions()" class="btn" id="saveBtn" style="margin-top: 15px;">Save All Transactions</button>
+        </div>
+    </div>
+</div>
+
+<!-- SBI card now inside container too -->
+<div class="container">
+    <div class="upload-card">
         <h1>🏦 SBI Bank Statement</h1><br><br>
         <p class="hint">Upload your YONO SBI savings account statement PDF</p><br>
 

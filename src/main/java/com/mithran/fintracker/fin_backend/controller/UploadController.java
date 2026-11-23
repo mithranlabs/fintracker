@@ -1,5 +1,8 @@
 package com.mithran.fintracker.fin_backend.controller;
 
+import com.mithran.fintracker.fin_backend.dto.UniversalParseResponseDTO;
+import com.mithran.fintracker.fin_backend.dto.UniversalSaveRequestDTO;
+import com.mithran.fintracker.fin_backend.dto.UniversalTransactionDTO;
 import com.mithran.fintracker.fin_backend.entity.Category;
 import com.mithran.fintracker.fin_backend.entity.MerchantRule;
 import com.mithran.fintracker.fin_backend.entity.Transaction;
@@ -11,6 +14,9 @@ import com.mithran.fintracker.fin_backend.repository.TransactionRepository;
 import com.mithran.fintracker.fin_backend.repository.UploadRepository;
 import com.mithran.fintracker.fin_backend.repository.UserRepository;
 import com.mithran.fintracker.fin_backend.service.SbiStatementParser;
+import com.mithran.fintracker.fin_backend.service.universal.UniversalStatementParserService;
+import com.mithran.fintracker.fin_backend.service.universal.UniversalStatementParseResult;
+import com.mithran.fintracker.fin_backend.service.universal.UniversalStatementTransaction;
 import jakarta.servlet.http.HttpSession;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -35,6 +41,7 @@ public class UploadController {
     private final UserRepository userRepository;
     private final UploadRepository uploadRepository;
     private final SbiStatementParser sbiStatementParser;
+    private final UniversalStatementParserService universalParser;
 
 
     private static final Map<String, List<String>> categoryKeywords = new HashMap<>();
@@ -92,13 +99,14 @@ public class UploadController {
 
 
     public UploadController(TransactionRepository repo,
-                            CategoryRepository categoryRepository, MerchantRuleRepository ruleRepository,UserRepository userRepository,UploadRepository uploadRepository,SbiStatementParser sbiStatementParser) {
+                            CategoryRepository categoryRepository, MerchantRuleRepository ruleRepository,UserRepository userRepository,UploadRepository uploadRepository,SbiStatementParser sbiStatementParser,UniversalStatementParserService universalParser) {
         this.repo = repo;
         this.categoryRepository = categoryRepository;
         this.ruleRepository = ruleRepository;
         this.userRepository = userRepository;
         this.uploadRepository = uploadRepository;
         this.sbiStatementParser = sbiStatementParser;
+        this.universalParser = universalParser;
     }
 
     @PostMapping
@@ -380,6 +388,218 @@ public class UploadController {
         String text = stripper.getText(doc);
         doc.close();
         return "<pre>" + text.replace("<", "&lt;") + "</pre>";
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /upload/universal  —  Universal statement parser (preview only, no DB save)
+    // Returns parsed transactions with confidence scores for user review
+    // ─────────────────────────────────────────────────────────────────────────
+    @PostMapping("/universal")
+    public ResponseEntity<?> uploadUniversal(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.status(404).body("User not found");
+
+        try {
+            // Read file content
+            String text;
+            String fileName = file.getOriginalFilename();
+            
+            if (fileName != null && fileName.toLowerCase().endsWith(".pdf")) {
+                // Extract text from PDF
+                PDDocument document = PDDocument.load(file.getInputStream());
+                PDFTextStripper stripper = new PDFTextStripper();
+                text = stripper.getText(document);
+                document.close();
+            } else {
+                // Read as plain text
+                text = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+
+            // Parse using universal parser
+            UniversalStatementParseResult parseResult = universalParser.parseText(text);
+
+            if (parseResult.getTransactions().isEmpty()) {
+                UniversalParseResponseDTO errorResponse = new UniversalParseResponseDTO();
+                errorResponse.setSuccess(false);
+                errorResponse.setMessage("No transactions found in the statement. Please check the file format.");
+                return ResponseEntity.ok(errorResponse);
+            }
+
+            // Build response DTO
+            UniversalParseResponseDTO response = new UniversalParseResponseDTO();
+            response.setSuccess(true);
+            response.setMessage("Successfully parsed " + parseResult.getTransactions().size() + " transactions");
+            response.setTotalTransactions(parseResult.getTransactions().size());
+
+            List<UniversalTransactionDTO> dtoList = new ArrayList<>();
+            int needsReview = 0;
+            int heuristicCount = 0;
+            int llmCount = 0;
+
+            java.time.format.DateTimeFormatter outputFormat = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy");
+
+            for (UniversalStatementTransaction txn : parseResult.getTransactions()) {
+                UniversalTransactionDTO dto = new UniversalTransactionDTO();
+                dto.setDate(txn.getTransactionDate().format(outputFormat));
+                dto.setAmount(txn.getAmount().doubleValue());
+                dto.setDirection(txn.getDirection().name());
+                dto.setNarration(txn.getNarration());
+                
+                // Determine parsing method from result level, not transaction level
+                dto.setParsingMethod(parseResult.getDetectionMethod().name());
+                dto.setConfidence(txn.getConfidenceScore());
+                dto.setNeedsReview(txn.getDirection() == UniversalStatementTransaction.Direction.UNKNOWN);
+
+                if (txn.getDirection() == UniversalStatementTransaction.Direction.UNKNOWN) {
+                    needsReview++;
+                }
+
+                dtoList.add(dto);
+            }
+
+            // Count by detection method
+            if (parseResult.getDetectionMethod() == UniversalStatementParseResult.DetectionMethod.HEURISTIC) {
+                heuristicCount = parseResult.getTransactions().size();
+            } else if (parseResult.getDetectionMethod() == UniversalStatementParseResult.DetectionMethod.LLM) {
+                llmCount = parseResult.getTransactions().size();
+            }
+
+            response.setTransactions(dtoList);
+            response.setNeedsReviewCount(needsReview);
+            response.setHeuristicCount(heuristicCount);
+            response.setLlmCount(llmCount);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            UniversalParseResponseDTO errorResponse = new UniversalParseResponseDTO();
+            errorResponse.setSuccess(false);
+            errorResponse.setMessage("Parsing failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /upload/universal/save  —  Save reviewed universal parser transactions
+    // Accepts corrected transactions from preview and persists to database
+    // ─────────────────────────────────────────────────────────────────────────
+    @PostMapping("/universal/save")
+    public ResponseEntity<?> saveUniversalTransactions(
+            @RequestBody UniversalSaveRequestDTO request,
+            HttpSession session) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.status(401).body("Not logged in");
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.status(404).body("User not found");
+
+        if (request.getTransactions() == null || request.getTransactions().isEmpty()) {
+            return ResponseEntity.badRequest().body("No transactions to save");
+        }
+
+        try {
+            // Replace existing if requested
+            if (request.isReplaceExisting()) {
+                repo.deleteByUser(user);
+            }
+
+            List<Transaction> savedTransactions = new ArrayList<>();
+            SimpleDateFormat inputFormat = new SimpleDateFormat("dd MMM yyyy");
+
+            for (UniversalTransactionDTO dto : request.getTransactions()) {
+                // Validate direction
+                if (dto.getDirection() == null || dto.getDirection().equals("UNKNOWN")) {
+                    return ResponseEntity.badRequest()
+                            .body("Cannot save transaction with UNKNOWN direction. Please correct all transactions before saving.");
+                }
+
+                if (!dto.getDirection().equals("DEBIT") && !dto.getDirection().equals("CREDIT")) {
+                    return ResponseEntity.badRequest()
+                            .body("Invalid direction: " + dto.getDirection() + ". Must be DEBIT or CREDIT.");
+                }
+
+                // Map to Transaction entity
+                Transaction txn = new Transaction();
+                
+                try {
+                    Date date = inputFormat.parse(dto.getDate());
+                    txn.setDate(date);
+                } catch (ParseException e) {
+                    return ResponseEntity.badRequest()
+                            .body("Invalid date format: " + dto.getDate());
+                }
+
+                txn.setAmount(dto.getAmount());
+                txn.setType(dto.getDirection().equals("DEBIT") ? "expense" : "income");
+                txn.setNote(dto.getNarration());
+                txn.setUser(user);
+
+                // Categorize using existing logic
+                String noteText = dto.getNarration().toLowerCase().trim();
+                Category category = resolveCategory(noteText, txn.getType());
+                txn.setCategory(category);
+
+                savedTransactions.add(txn);
+            }
+
+            // Save all transactions
+            repo.saveAll(savedTransactions);
+
+            // Save upload history
+            Upload upload = new Upload();
+            upload.setFileName(request.getFileName() != null ? request.getFileName() : "universal-statement.txt");
+            upload.setUploadDate(new Date());
+            upload.setTransactionCount(savedTransactions.size());
+            upload.setUser(user);
+            uploadRepository.save(upload);
+
+            return ResponseEntity.ok("Successfully saved " + savedTransactions.size() + " transactions");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to save transactions: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Resolve category using merchant rules and keyword matching.
+     * Extracted from GPay upload logic for reuse.
+     */
+    private Category resolveCategory(String noteText, String type) {
+        // Check merchant rules first
+        Optional<MerchantRule> ruleOpt = ruleRepository.findByKeyword(noteText);
+        if (ruleOpt.isPresent()) {
+            return ruleOpt.get().getCategory();
+        }
+
+        // Check keyword map
+        for (String catName : categoryKeywords.keySet()) {
+            List<String> words = categoryKeywords.get(catName);
+            for (String w : words) {
+                if (noteText.contains(w)) {
+                    Category category = categoryRepository.findByName(catName);
+                    if (category == null) {
+                        category = new Category();
+                        category.setName(catName);
+                        category.setType(type);
+                        categoryRepository.save(category);
+                    }
+                    return category;
+                }
+            }
+        }
+
+        // Fallback
+        String fallbackName = type.equals("income") ? "Salary" : "Personal";
+        return categoryRepository.findByName(fallbackName);
     }
 
 
