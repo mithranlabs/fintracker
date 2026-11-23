@@ -1,0 +1,15 @@
+PROBLEMATIC BANK
+Account Statement with Issues
+Account: XXXX9999
+Period: 01-Sep-2024 to 30-Sep-2024
+
+Date        Description                    Amount     Balance
+05/09/2024  Valid Transaction DR          100.00     5000.00
+32/13/2024  Invalid Date Entry            200.00     4800.00
+10/09/2024  Missing Type Indicator        300.00     4500.00
+15/09/2024  Transaction with no amount               4500.00
+20/09/2024  Negative Amount              -500.00     5000.00
+25/09/2024  Valid Credit CR               1000.00    6000.00
+2024-09-28  Wrong Date Format            500.00     5500.00
+30/09/2024  Ambiguous DR CR Both          250.00     5250.00
+            Random text not a transaction line with no date

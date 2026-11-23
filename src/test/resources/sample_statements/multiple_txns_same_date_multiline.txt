@@ -1,0 +1,43 @@
+SUNRISE BANK
+Account Statement for Account XXXX7890
+Statement Period: 01 Jun 2024 - 30 Jun 2024
+
+Account Holder: Alice Williams (Synthetic Data)
+
+===============================================================================
+
+Opening Balance: 20000.00
+
+10/06/2024
+UPI/CoffeeShop/HDFC/
+Reference: UPI-111111111
+Payment for morning coffee
+                                     150.00    DR         19850.00
+
+10/06/2024
+UPI/BookStore/ICICI/
+Reference: UPI-222222222
+Purchase of books
+                                     850.00    DR         19000.00
+
+10/06/2024
+UPI/RestaurantABC/SBI/
+Reference: UPI-333333333
+Lunch payment
+                                     450.00    DR         18550.00
+
+15/06/2024
+NEFT from Client XYZ Corp
+Invoice payment
+Reference: NEFT567890
+                                     -         25000.00   43550.00
+
+15/06/2024
+UPI/OnlineShopping/AXIS/
+Reference: UPI-444444444
+Clothing purchase
+                                     2000.00   DR         41550.00
+
+===============================================================================
+Closing Balance: 41550.00
+===============================================================================

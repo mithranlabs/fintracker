@@ -1,0 +1,29 @@
+METRO CITY BANK
+Account Statement for Account XXXX3456
+Statement Period: 01 May 2024 - 31 May 2024
+
+Account Holder: Robert Johnson (Synthetic Data)
+
+===============================================================================
+Date           Description                    Debit      Credit     Balance
+===============================================================================
+
+-              Opening Balance                -          -          25000.00
+
+01 May 2024    ATM Withdrawal                 1000.00    -          24000.00
+
+05 May 2024    Salary Credit                  -          75000.00   99000.00
+
+10 May 2024    Rent Payment                   15000.00   -          84000.00
+
+15 May 2024    UPI - Grocery Shopping         2500.50    -          81499.50
+
+20 May 2024    Freelance Payment Received     -          12000.00   93499.50
+
+25 May 2024    Utility Bills                  3500.00    -          89999.50
+
+30 May 2024    Interest Credited              -          149.50     90149.00
+
+===============================================================================
+Closing Balance: 90149.00
+===============================================================================

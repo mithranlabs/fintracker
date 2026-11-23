@@ -1,0 +1,15 @@
+CITY BANK EXPRESS
+Debit Card Statement
+Card: XXXX1111
+Period: 01-Aug-2024 to 31-Aug-2024
+
+Date        Merchant/Description           Amount     Type      Balance
+10/08/2024  Coffee House Alpha            5.00       DR        1000.00
+10/08/2024  Coffee House Beta             5.00       DR         995.00
+10/08/2024  Coffee House Gamma            5.00       DR         990.00
+15/08/2024  Grocery Store A              50.00       DR         940.00
+15/08/2024  Grocery Store B              50.00       DR         890.00
+20/08/2024  Gas Station A Payment        40.00       DR         850.00
+20/08/2024  Gas Station B Payment        40.00       DR         810.00
+25/08/2024  Restaurant Lunch              5.00       DR         805.00
+25/08/2024  Restaurant Dinner             5.00       DR         800.00

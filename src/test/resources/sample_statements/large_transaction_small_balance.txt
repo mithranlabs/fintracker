@@ -1,0 +1,13 @@
+SUNRISE BANK
+Current Account Statement
+A/C: XXXX7890
+Period: 01-Jul-2024 to 15-Jul-2024
+
+Date        Description                    Amount       Balance
+01/07/2024  Opening Balance                             5000.00
+03/07/2024  Small Withdrawal DR           100.00       4900.00
+05/07/2024  Major Deposit CR              75000.00     79900.00
+08/07/2024  Large Payment DR              50000.00     29900.00
+10/07/2024  Huge Deposit CR              100000.00    129900.00
+12/07/2024  Minimal Withdrawal DR          50.00      129850.00
+15/07/2024  Small Balance Deposit CR       150.00     130000.00

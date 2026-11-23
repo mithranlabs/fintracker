@@ -1,0 +1,31 @@
+GLOBAL BANK PLC
+Account Statement for Account XXXX9012
+Statement Period: 01 Apr 2024 - 30 Apr 2024
+
+Account Holder: Jane Smith (Synthetic Data)
+
+===============================================================================
+Date        Description                              Amount     DR/CR  Balance
+===============================================================================
+
+-           Opening Balance                          -          -      15000.00
+
+05/04/2024  Purchase - Invoice dated 01/04/2024      1000.00    DR     14000.00
+            Vendor: Tech Supplies Inc
+
+10/04/2024  Payment received for bill dated          2500.00    CR     16500.00
+            15/03/2024 - Customer ABC
+
+15/04/2024  Cheque issued on 10/04/2024              5000.00    DR     11500.00
+            Cleared on 15/04/2024
+
+20/04/2024  Insurance renewal for policy             1200.00    DR     10300.00
+            expiring 30/04/2024
+            Policy start: 01/05/2024
+
+25/04/2024  Refund for cancelled booking             500.00     CR     10800.00
+            Original booking: 20/03/2024
+
+===============================================================================
+Closing Balance: 10800.00
+===============================================================================

@@ -1,0 +1,14 @@
+ACME BANK LIMITED
+Account Statement for Savings Account
+Account Number: XXXX1234
+Statement Period: 01-Mar-2024 to 31-Mar-2024
+
+Date        Particulars                    Withdrawal  Deposit    Balance
+01/03/2024  Opening Balance                                       10000.00
+05/03/2024  ATM Withdrawal City Center    500.00                 9500.00
+10/03/2024  Salary Credit Acme Corp                   50000.00   59500.00
+15/03/2024  UPI Payment to Merchant A     250.50                 59249.50
+20/03/2024  NEFT Transfer from John Doe               5000.00    64249.50
+25/03/2024  Debit Card Purchase           1200.00                63049.50
+28/03/2024  Interest Credited                         49.50      63099.00
+31/03/2024  Closing Balance                                      63099.00

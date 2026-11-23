@@ -1,0 +1,14 @@
+GLOBAL BANK PLC
+Transaction History - Current Account
+A/C No: XXXX5678
+Period: 01-Apr-2024 to 30-Apr-2024
+
+Date        Description                           Amount     Type
+05/04/2024  ATM Cash Withdrawal Mumbai           2000.00    DR
+08/04/2024  Cheque Deposit #123456              25000.00    CR
+12/04/2024  Online Payment Utility Bill          1500.75    DR
+15/04/2024  Standing Instruction Rent           15000.00    DR
+18/04/2024  Transfer from Fixed Deposit         50000.00    CR
+22/04/2024  Point of Sale Grocery Store           850.25    DR
+25/04/2024  Dividend Credit                       5000.00    CR
+28/04/2024  Bank Charges                           150.00    DEBIT

@@ -1,0 +1,15 @@
+BHARAT NATIONAL BANK
+Savings Account Statement
+Account: XXXX9012
+Date Range: 01-May-2024 to 31-May-2024
+
+Trans Date  Narration                           Withdrawal    Deposit      Balance
+01/05/2024  Opening Balance                                                25,000.00
+05/05/2024  Property Tax Payment               12,500.00                  12,500.00
+10/05/2024  Salary Credit May 2024                          1,25,000.00  1,37,500.00
+15/05/2024  Investment in Mutual Fund          50,000.00                  87,500.00
+18/05/2024  Fixed Deposit Maturity                          2,50,000.00  3,37,500.00
+22/05/2024  Insurance Premium Annual           45,750.50                  2,91,749.50
+25/05/2024  Freelance Payment Received                      75,500.75    3,67,250.25
+28/05/2024  Car Loan EMI                       28,340.00                  3,38,910.25
+31/05/2024  Closing Balance                                               3,38,910.25

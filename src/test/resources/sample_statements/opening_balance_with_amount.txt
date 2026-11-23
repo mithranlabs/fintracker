@@ -1,0 +1,30 @@
+CITY COMMERCIAL BANK
+Account Statement for Account XXXX4567
+Statement Period: 01 Jul 2024 - 31 Jul 2024
+
+Account Holder: Michael Brown (Synthetic Data)
+
+===============================================================================
+Date        Description              Debit      Credit     Balance
+===============================================================================
+
+-           Opening Balance          -          -          5000.00
+
+03/07/2024  ATM Withdrawal           500.00     -          4500.00
+
+05/07/2024  Salary Deposit           -          50000.00   54500.00
+
+10/07/2024  Bill Payment             1200.00    -          53300.00
+
+15/07/2024  NEFT Transfer            10000.00   -          43300.00
+
+20/07/2024  Cheque Deposit           -          5000.00    48300.00
+
+===============================================================================
+
+-           Closing Balance          -          -          48300.00
+
+===============================================================================
+
+Note: Opening and Closing Balance rows should NOT be extracted as transactions.
+They are metadata rows, not actual financial transactions.

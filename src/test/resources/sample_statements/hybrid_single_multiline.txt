@@ -1,0 +1,33 @@
+ACME HYBRID BANK
+Account Statement for Account XXXX5678
+Statement Period: 01 Mar 2024 - 31 Mar 2024
+
+Account Holder: John Doe (Synthetic Data)
+Branch: Main Street Branch
+
+===============================================================================
+Date        Description              Debit      Credit     Balance
+===============================================================================
+
+-           Opening Balance          -          -          10000.00
+
+05/03/2024  ATM Withdrawal           500.00     -          9500.00
+
+10/03/2024
+UPI/MerchantLongName/IDFC/
+Reference: UPI-123456789
+                                     250.00     -          9250.00
+
+15/03/2024  Salary Credit            -          50000.00   59250.00
+
+20/03/2024
+NEFT Transfer to
+ABC Corporation Ltd
+IFSC: ABCD0001234
+                                     5000.00    -          54250.00
+
+25/03/2024  Interest Credited        -          125.50     54375.50
+
+===============================================================================
+Closing Balance: 54375.50
+===============================================================================

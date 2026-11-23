@@ -1,0 +1,21 @@
+METRO CITY BANK
+Account Statement
+Account Number: XXXX3456
+Period: 01-Jun-2024 to 30-Jun-2024
+
+Date        Transaction Details                              Debit      Credit     Balance
+05/06/2024  Payment to Vendor ABC Ltd                       5000.00                45000.00
+            Invoice #INV-2024-1234
+            Reference: PO-5678
+10/06/2024  International Wire Transfer                     15000.00               30000.00
+            Beneficiary: Global Suppliers Inc
+            SWIFT: ABCD1234
+            Purpose: Import Payment
+15/06/2024  Salary Credit June 2024                                    60000.00   90000.00
+            Employer: Tech Solutions Pvt Ltd
+20/06/2024  Rent Payment to Landlord                        12000.00               78000.00
+            Property: 123 Main Street
+            Agreement #LR-2024-001
+25/06/2024  Freelance Income                                            25000.00  103000.00
+            Project: Website Development
+            Client: StartUp XYZ
