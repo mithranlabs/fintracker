@@ -119,8 +119,11 @@ public class UploadController {
         }
 
         User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return "User not found";
+        }
         if (replace) {
-            repo.deleteAll();
+            repo.deleteByUser(user);
         }
 
         try {
