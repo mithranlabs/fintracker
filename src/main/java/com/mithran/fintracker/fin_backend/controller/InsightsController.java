@@ -27,7 +27,7 @@ public class InsightsController {
 
     private static final long CACHE_DURATION_MS = 2 * 60 * 1000;
 
-    @Value("${gemini.api.key}")
+    @Value("${groq.api.key:${gemini.api.key:}}")
     private String geminiApiKey;
 
     public InsightsController(
