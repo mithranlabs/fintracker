@@ -383,15 +383,7 @@ public class UploadController {
             return ResponseEntity.status(500).body("Parsing failed: " + e.getMessage());
         }
     }
-    @GetMapping("/sbi/test")
-    public String testSbiParse() throws Exception {
-        File f = new File("C:\\Users\\mithr\\Downloads\\AccountStatement_23032026_212526.pdf");
-        PDDocument doc = PDDocument.load(f, "MITHR31122004");
-        PDFTextStripper stripper = new PDFTextStripper();
-        String text = stripper.getText(doc);
-        doc.close();
-        return "<pre>" + text.replace("<", "&lt;") + "</pre>";
-    }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // POST /upload/universal  —  Universal statement parser (preview only, no DB save)
