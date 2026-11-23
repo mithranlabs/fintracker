@@ -95,6 +95,7 @@ spring.datasource.password=your_mysql_password
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 groq.api.key=your_groq_api_key
+# Legacy fallback: gemini.api.key=your_groq_api_key
 ```
 
 4. **Run the application**
@@ -117,10 +118,24 @@ Hibernate will auto-create all tables on first run.
 
 ## Supported Bank Statements
 
-| Bank | Format | Notes |
+| Bank / Source | Format | Notes |
 |---|---|---|
 | SBI YONO | PDF (password-protected) | Password: first 5 letters of name + DOB (DDMMYYYY) |
 | Google Pay | UPI PDF | Multi-line transaction support |
+| **Universal Parser** | PDF / TXT (Multi-Bank) | AI + regex heuristic engine with interactive preview and manual direction review |
+
+### Universal Bank Statement Parser
+The Universal Parser provides a content-agnostic extraction pipeline for multiple financial institutions. It combines high-throughput regex token heuristics with optional Groq LLM parsing (`openai/gpt-oss-20b`), generating a preview table where users can inspect confidence scores and correct transaction directions before persisting to the database.
+
+---
+
+## Documentation
+
+Comprehensive architecture documentation, developer guides, and phase evaluation reports are located in the [`docs/`](docs/README.md) directory:
+- [Docs Index](docs/README.md)
+- [Development Setup Guide](docs/DEVELOPMENT.md)
+- [Exhibition Demo Guide](docs/DEMO_GUIDE.md)
+- [Universal Parser Quick Start](docs/UNIVERSAL_PARSER_QUICK_START.md)
 
 ---
 
